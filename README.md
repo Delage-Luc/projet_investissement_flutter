@@ -1,3 +1,2 @@
-# projet_investissement_flutter
+# Projet investissement Flutter
 
-A new Flutter project.
