@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:projet_investissement_flutter/config/app_config.dart';
 import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/favorites/view_models/favorites_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/widgets/asset_tile.dart';
-import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/error_view.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/status_banner.dart';
 import 'package:projet_investissement_flutter/utils/async_state.dart';
@@ -22,33 +21,7 @@ class MarketPage extends StatelessWidget {
     final state = market.state;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Marché'),
-        actions: [
-          PopupMenuButton<String>(
-            tooltip: 'Devise',
-            icon: const Icon(Icons.currency_exchange),
-            initialValue: market.vsCurrency,
-            onSelected: market.changeCurrency,
-            itemBuilder: (context) => [
-              for (final c in AppConfig.supportedCurrencies)
-                PopupMenuItem(value: c, child: Text(c.toUpperCase())),
-            ],
-          ),
-          IconButton(
-            tooltip: 'Changer de thème',
-            icon: Icon(Theme.of(context).brightness == Brightness.dark
-                ? Icons.light_mode
-                : Icons.dark_mode),
-            onPressed: () {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              context
-                  .read<SettingsViewModel>()
-                  .setThemeMode(isDark ? ThemeMode.light : ThemeMode.dark);
-            },
-          ),
-        ],
-      ),
+      appBar: CustomAppBar(title: 'Marché'),
       body: Column(
         children: [
           Padding(

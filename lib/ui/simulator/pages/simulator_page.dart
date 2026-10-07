@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:projet_investissement_flutter/ui/simulator/view_models/simulator_view_model.dart';
 import 'package:projet_investissement_flutter/ui/simulator/widgets/projection_chart.dart';
 import 'package:projet_investissement_flutter/ui/simulator/widgets/result_summary.dart';
@@ -32,7 +33,7 @@ class _SimulatorView extends StatelessWidget {
     final vs = context.watch<SettingsViewModel>().vsCurrency;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Simulateur')),
+      appBar: CustomAppBar(title: 'Simulateur DCA'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

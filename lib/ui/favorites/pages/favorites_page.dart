@@ -5,6 +5,7 @@ import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/favorites/view_models/favorites_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/widgets/asset_tile.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 /// Liste des actifs favoris.
@@ -23,7 +24,7 @@ class FavoritesPage extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Favoris')),
+      appBar: CustomAppBar(title: 'Favoris'),
       body: favorites.isEmpty
           ? _EmptyFavorites(onExplore: () => context.go(Routes.market))
           : assets.isEmpty
