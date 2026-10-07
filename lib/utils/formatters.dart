@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 
-/// Formate les montants, pourcentages et dates en français.
+/// Formatage des montants, pourcentages et dates (locale fr_FR).
 class Formatters {
   const Formatters._();
 
@@ -17,13 +17,22 @@ class Formatters {
     }
   }
 
-  /// Affiche plus de décimales pour les petits prix.
+  /// Plus le prix est petit, plus on affiche de décimales.
   static String price(double value, String vsCurrency) {
     final decimals = value >= 1 ? 2 : (value >= 0.01 ? 4 : 6);
     return NumberFormat.currency(
       locale: _locale,
       symbol: currencySymbol(vsCurrency),
       decimalDigits: decimals,
+    ).format(value);
+  }
+
+  /// Montant arrondi à l'unité (résultats de simulation).
+  static String money(double value, String vsCurrency) {
+    return NumberFormat.currency(
+      locale: _locale,
+      symbol: currencySymbol(vsCurrency),
+      decimalDigits: 0,
     ).format(value);
   }
 
