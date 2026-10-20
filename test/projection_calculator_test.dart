@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:projet_investissement_flutter/domain/models/crypto_asset.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
+import 'package:projet_investissement_flutter/domain/models/price_point.dart';
 import 'package:projet_investissement_flutter/utils/projection_calculator.dart';
 
 SimulationInput input({
@@ -9,18 +11,19 @@ SimulationInput input({
   double monthly = 0,
   double rate = 0,
   int years = 1,
-}) =>
-    SimulationInput(
-      initialCapital: initial,
-      monthlyContribution: monthly,
-      annualRatePercent: rate,
-      years: years,
-    );
+}) => SimulationInput(
+  initialCapital: initial,
+  monthlyContribution: monthly,
+  annualRatePercent: rate,
+  years: years,
+);
 
 void main() {
   group('project', () {
     test('1000 € à 5 % pendant 10 ans sans versement ≈ 1628,89 €', () {
-      final r = ProjectionCalculator.project(input(initial: 1000, rate: 5, years: 10));
+      final r = ProjectionCalculator.project(
+        input(initial: 1000, rate: 5, years: 10),
+      );
       expect(r.finalValue, closeTo(1628.89, 0.01));
       expect(r.totalInvested, 1000);
     });
@@ -52,26 +55,32 @@ void main() {
       expect(r.totalInvested, 1200);
     });
 
-    test('rendement négatif : la valeur finale est inférieure au capital versé',
-        () {
-      final r = ProjectionCalculator.project(
-        input(initial: 1000, rate: -10, years: 2),
-      );
-      expect(r.finalValue, closeTo(810, 0.01)); // 1000 × 0,9²
-      expect(r.gain, lessThan(0));
-      expect(r.performancePercent, closeTo(-19, 0.01));
-    });
+    test(
+      'rendement négatif : la valeur finale est inférieure au capital versé',
+      () {
+        final r = ProjectionCalculator.project(
+          input(initial: 1000, rate: -10, years: 2),
+        );
+        expect(r.finalValue, closeTo(810, 0.01)); // 1000 × 0,9²
+        expect(r.gain, lessThan(0));
+        expect(r.performancePercent, closeTo(-19, 0.01));
+      },
+    );
   });
 
   group('paramètres invalides -> résultat vide', () {
     test('capital négatif', () {
-      expect(ProjectionCalculator.project(input(initial: -1, monthly: 10)).isEmpty,
-          isTrue);
+      expect(
+        ProjectionCalculator.project(input(initial: -1, monthly: 10)).isEmpty,
+        isTrue,
+      );
     });
 
     test('versement négatif', () {
-      expect(ProjectionCalculator.project(input(initial: 10, monthly: -5)).isEmpty,
-          isTrue);
+      expect(
+        ProjectionCalculator.project(input(initial: 10, monthly: -5)).isEmpty,
+        isTrue,
+      );
     });
 
     test('capital et versement tous deux nuls', () {
@@ -79,13 +88,17 @@ void main() {
     });
 
     test('durée nulle', () {
-      expect(ProjectionCalculator.project(input(initial: 100, years: 0)).isEmpty,
-          isTrue);
+      expect(
+        ProjectionCalculator.project(input(initial: 100, years: 0)).isEmpty,
+        isTrue,
+      );
     });
 
     test('rendement de -100 % ou moins', () {
-      expect(ProjectionCalculator.project(input(initial: 100, rate: -100)).isEmpty,
-          isTrue);
+      expect(
+        ProjectionCalculator.project(input(initial: 100, rate: -100)).isEmpty,
+        isTrue,
+      );
     });
 
     test('valeur non finie', () {
@@ -94,7 +107,8 @@ void main() {
         isTrue,
       );
       expect(
-        ProjectionCalculator.project(input(initial: 100, rate: double.nan)).isEmpty,
+        ProjectionCalculator.project(input(initial: 100, rate: double.nan))
+            .isEmpty,
         isTrue,
       );
     });
@@ -104,5 +118,67 @@ void main() {
       expect(ProjectionResult.empty.gain, 0);
       expect(ProjectionResult.empty.performancePercent, isNull);
     });
+  });
+
+  group('projectFromHistory', () {
+    test('rejoue les achats mensuels au cours observé', () {
+      final asset = CryptoAsset(
+        id: 'bitcoin',
+        symbol: 'btc',
+        name: 'Bitcoin',
+        currentPrice: 200,
+      );
+      final start = ProjectionCalculator.historyStartDate(1);
+      final history = [
+        PricePoint(date: start, price: 100),
+        for (var month = 1; month <= 12; month++)
+          PricePoint(
+            date: DateTime.utc(start.year, start.month + month, 1),
+            price: 200,
+          ),
+        PricePoint(
+          date: DateTime.utc(start.year + 1, start.month, start.day),
+          price: 200,
+        ),
+      ];
+
+      final result = ProjectionCalculator.projectFromHistory(
+        SimulationInput(
+          initialCapital: 1000,
+          monthlyContribution: 100,
+          annualRatePercent: 0,
+          years: 1,
+          cryptoAsset: asset,
+        ),
+        history,
+      );
+
+      expect(result.points, hasLength(13));
+      expect(result.totalInvested, 2200);
+      expect(result.finalValue, closeTo(3200, 1e-9));
+    });
+
+    test(
+      "renvoie un résultat vide si la période demandée n'est pas couverte",
+      () {
+        final result = ProjectionCalculator.projectFromHistory(
+          SimulationInput(
+            initialCapital: 100,
+            monthlyContribution: 0,
+            annualRatePercent: 0,
+            years: 1,
+            cryptoAsset: CryptoAsset(
+              id: 'bitcoin',
+              symbol: 'btc',
+              name: 'Bitcoin',
+              currentPrice: 200,
+            ),
+          ),
+          [PricePoint(date: DateTime.now().toUtc(), price: 200)],
+        );
+
+        expect(result.isEmpty, isTrue);
+      },
+    );
   });
 }

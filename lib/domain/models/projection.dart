@@ -1,4 +1,5 @@
 import 'package:projet_investissement_flutter/utils/finance_calculator.dart';
+import 'package:projet_investissement_flutter/domain/models/crypto_asset.dart';
 
 /// Paramètres saisis par l'utilisateur pour le simulateur DCA.
 class SimulationInput {
@@ -7,6 +8,7 @@ class SimulationInput {
     required this.monthlyContribution,
     required this.annualRatePercent,
     required this.years,
+    this.cryptoAsset,
   });
 
   /// Capital de départ.
@@ -20,6 +22,9 @@ class SimulationInput {
 
   /// Durée d'investissement, en années entières.
   final int years;
+
+  /// Crypto dont les cours historiques sont rejoués, ou null pour un taux fixe.
+  final CryptoAsset? cryptoAsset;
 }
 
 /// État du portefeuille simulé à la fin d'un mois.

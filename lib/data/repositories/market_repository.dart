@@ -59,41 +59,78 @@ class MarketRepository {
   Future<CachedData<List<PricePoint>>> getHistory({
     required String assetId,
     required String vsCurrency,
+    DateTime? from,
     bool forceRefresh = false,
   }) async {
     final metaKey = 'history:$assetId:$vsCurrency';
+    final rangeMetaKey = 'history-range:$assetId:$vsCurrency';
     final cached = await _db.getPricePoints(assetId, vsCurrency);
     final updatedAt = await _db.getMeta(metaKey);
+    final checkedFrom = await _db.getMeta(rangeMetaKey);
+    final requestedStart = from == null ? null : PricePoint.dayStart(from);
+    final requestedRangeChecked = requestedStart == null ||
+        (checkedFrom != null && !checkedFrom.isAfter(requestedStart));
+    final hasRequestedHistory = cached.isNotEmpty ||
+        (requestedStart != null && requestedRangeChecked);
+    final coversRequestedStart = requestedStart == null ||
+        (cached.isNotEmpty && !cached.first.date.isAfter(requestedStart)) ||
+        requestedRangeChecked;
 
     if (!forceRefresh &&
-        cached.isNotEmpty &&
+        hasRequestedHistory &&
+        coversRequestedStart &&
         _isFresh(updatedAt, AppConfig.historyTtl)) {
       return CachedData(cached, updatedAt!);
     }
 
     try {
-      final List<PricePoint> fetched;
       if (cached.isEmpty) {
-        fetched = await _client.fetchMarketChart(
-          assetId: assetId,
-          vsCurrency: vsCurrency,
-        );
+        final initial = requestedStart == null
+            ? await _client.fetchMarketChart(
+                assetId: assetId,
+                vsCurrency: vsCurrency,
+              )
+            : await _client.fetchMarketChartRange(
+                assetId: assetId,
+                vsCurrency: vsCurrency,
+                from: requestedStart,
+                to: _now().toUtc(),
+              );
+        await _db.upsertPricePoints(assetId, vsCurrency, initial);
+        if (requestedStart != null) {
+          await _db.setMeta(rangeMetaKey, requestedStart);
+        }
       } else {
-        fetched = await _client.fetchMarketChartRange(
-          assetId: assetId,
-          vsCurrency: vsCurrency,
-          from: cached.last.date,
-          to: _now().toUtc(),
-        );
+        if (requestedStart != null &&
+            cached.first.date.isAfter(requestedStart) &&
+            !requestedRangeChecked) {
+          final older = await _client.fetchMarketChartRange(
+            assetId: assetId,
+            vsCurrency: vsCurrency,
+            from: requestedStart,
+            to: cached.first.date,
+          );
+          await _db.upsertPricePoints(assetId, vsCurrency, older);
+          await _db.setMeta(rangeMetaKey, requestedStart);
+        }
+        if (forceRefresh || !_isFresh(updatedAt, AppConfig.historyTtl)) {
+          final newer = await _client.fetchMarketChartRange(
+            assetId: assetId,
+            vsCurrency: vsCurrency,
+            from: cached.last.date,
+            to: _now().toUtc(),
+          );
+          await _db.upsertPricePoints(assetId, vsCurrency, newer);
+        }
       }
-      await _db.upsertPricePoints(assetId, vsCurrency, fetched);
       final now = _now().toUtc();
       await _db.setMeta(metaKey, now);
       final merged = await _db.getPricePoints(assetId, vsCurrency);
       return CachedData(merged, now);
     } on ApiException {
-      if (cached.isNotEmpty && updatedAt != null) {
-        return CachedData(cached, updatedAt, isStale: true);
+      final fallback = await _db.getPricePoints(assetId, vsCurrency);
+      if (fallback.isNotEmpty && updatedAt != null) {
+        return CachedData(fallback, updatedAt, isStale: true);
       }
       rethrow;
     }
