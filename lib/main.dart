@@ -18,7 +18,7 @@ Future<void> main() async {
   await settings.load(); // Charge les préférences avant l'affichage.
 
   runApp(App(
-    settings: settings,
+  settings: settings,
     marketRepository: MarketRepository(
       client: CoinGeckoClient(),
       database: database,
