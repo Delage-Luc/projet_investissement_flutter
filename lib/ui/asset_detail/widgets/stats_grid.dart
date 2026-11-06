@@ -80,9 +80,13 @@ class _StatCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => showDialog<void>(
+        onTap: () => showGeneralDialog<void>(
           context: context,
-          builder: (context) => AlertDialog(
+          barrierDismissible: true,
+          barrierLabel: MaterialLocalizations.of(context)
+              .modalBarrierDismissLabel,
+          transitionDuration: const Duration(milliseconds: 250),
+          pageBuilder: (context, animation, secondaryAnimation) => AlertDialog(
             title: Text(label),
             content: Text(explanation),
             actions: [
@@ -92,6 +96,15 @@ class _StatCard extends StatelessWidget {
               ),
             ],
           ),
+          transitionBuilder: (context, animation, secondaryAnimation, child) =>
+              ScaleTransition(
+                scale: CurvedAnimation(
+                  parent: animation,
+                  curve: Curves.easeOutBack,
+                  reverseCurve: Curves.easeIn,
+                ),
+                child: child,
+              ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -101,9 +114,11 @@ class _StatCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(label,
-                        style: textTheme.labelMedium,
-                        overflow: TextOverflow.ellipsis),
+                    child: Text(
+                      label,
+                      style: textTheme.labelMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const Icon(Icons.info_outline, size: 14),
                 ],
