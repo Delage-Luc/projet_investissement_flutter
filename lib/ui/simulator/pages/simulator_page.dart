@@ -198,7 +198,7 @@ class _DcaIntro extends StatelessWidget {
       shape: const RoundedRectangleBorder(),
       collapsedShape: const RoundedRectangleBorder(),
       leading: Icon(
-        Icons.auto_awesome_rounded,
+        Icons.help_outline_rounded,
         size: 28,
         color: Theme.of(context).colorScheme.primary,
       ),

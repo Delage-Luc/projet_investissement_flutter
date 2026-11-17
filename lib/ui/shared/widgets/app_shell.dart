@@ -14,7 +14,7 @@ class AppShell extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
   static const List<_Tab> _tabs = [
-    _Tab(Icons.show_chart_rounded, Icons.insights_rounded, 'Marché'),
+    _Tab(Icons.show_chart_outlined, Icons.show_chart_rounded, 'Marché'),
     _Tab(Icons.star_border_rounded, Icons.star_rounded, 'Favoris'),
     _Tab(Icons.calculate_outlined, Icons.calculate_rounded, 'Simulateur'),
   ];

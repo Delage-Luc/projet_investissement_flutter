@@ -32,7 +32,7 @@ class ScoreCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.insights_rounded),
+                const Icon(Icons.show_chart_rounded),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
