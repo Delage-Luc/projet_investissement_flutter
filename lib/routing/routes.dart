@@ -14,9 +14,15 @@ class Routes {
   static const String savedSimulations = '/simulator/saved';
   static String savedSimulation(int id) => '$savedSimulations/$id';
 
-  /// Lexique ; [term] ouvre directement la définition d'une notion.
+  /// Onglet Lexique.
   static const String glossaryPattern = '/glossary';
+
+  /// Notion du lexique ouverte par-dessus la page en cours (liens
+  /// « Lexique : … »), pour revenir à la fiche d'un simple retour.
+  static const String glossaryNotePattern = '/notion';
+
+  /// Sans [term] : l'onglet ; avec [term] : la notion, ouverte par-dessus.
   static String glossary({String? term}) => term == null
       ? glossaryPattern
-      : '$glossaryPattern?term=${Uri.encodeQueryComponent(term)}';
+      : '$glossaryNotePattern?term=${Uri.encodeQueryComponent(term)}';
 }

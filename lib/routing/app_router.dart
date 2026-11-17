@@ -10,8 +10,9 @@ import 'package:projet_investissement_flutter/ui/saved_simulations/pages/saved_s
 import 'package:projet_investissement_flutter/ui/shared/widgets/app_shell.dart';
 import 'package:projet_investissement_flutter/ui/simulator/pages/simulator_page.dart';
 
-/// Trois onglets, une fiche d'actif et un lexique accessibles depuis chacun
-/// d'eux ; les simulations sauvegardées sont dans l'onglet Simulateur.
+/// Quatre onglets (Marché, Favoris, Simulateur, Lexique). La fiche d'actif
+/// et les notions du lexique s'ouvrent par-dessus ; les simulations
+/// sauvegardées sont dans l'onglet Simulateur.
 GoRouter createRouter() {
   final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -56,6 +57,12 @@ GoRouter createRouter() {
               ],
             ),
           ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.glossaryPattern,
+              builder: (context, state) => const GlossaryPage(asTab: true),
+            ),
+          ]),
         ],
       ),
       GoRoute(
@@ -65,7 +72,7 @@ GoRouter createRouter() {
             AssetDetailPage(assetId: state.pathParameters['id']!),
       ),
       GoRoute(
-        path: Routes.glossaryPattern,
+        path: Routes.glossaryNotePattern,
         parentNavigatorKey: rootNavigatorKey,
         builder: (context, state) =>
             GlossaryPage(initialTermId: state.uri.queryParameters['term']),

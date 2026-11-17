@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:projet_investissement_flutter/config/app_config.dart';
-import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:provider/provider.dart';
@@ -55,17 +53,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        AppBarActions(
-          children: [
-            ...actions,
-            IconButton(
-              tooltip: 'Lexique',
-              visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.menu_book_rounded, size: 21),
-              onPressed: () => context.push(Routes.glossary()),
-            ),
-          ],
-        ),
+        AppBarActions(children: actions),
       ],
     );
   }

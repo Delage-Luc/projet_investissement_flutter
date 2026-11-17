@@ -45,7 +45,7 @@
 ## Lexique
 
 ### [`lib/ui/glossary/pages/glossary_page.dart`](../lib/ui/glossary/pages/glossary_page.dart)
-`GlossaryPage` liste les notions avec une recherche. Ouverte avec `initialTermId`, elle déplie la notion demandée et la fait défiler à l'écran (`GlobalKey` + `Scrollable.ensureVisible`).
+`GlossaryPage` liste les notions avec une recherche. Elle sert d'onglet (`asTab`, avec la barre des onglets) et de page ouverte par-dessus depuis un lien « Lexique : … ». Ouverte avec `initialTermId`, elle déplie la notion demandée et la fait défiler à l'écran (`GlobalKey` + `Scrollable.ensureVisible`).
 
 ## Simulations sauvegardées
 
@@ -78,7 +78,7 @@
 `AppShell` affiche la barre de navigation et gère le changement entre les trois onglets avec leur navigation conservée.
 
 ### [`lib/ui/shared/widgets/custom_app_bar.dart`](../lib/ui/shared/widgets/custom_app_bar.dart)
-`CustomAppBar` est la barre des onglets : actions propres à l'écran, lexique, devise (écrite dans `SettingsViewModel`) et thème.
+`CustomAppBar` est la barre des onglets : actions propres à l'écran, devise (écrite dans `SettingsViewModel`) et thème, regroupées par `AppBarActions`, présent aussi sur les autres pages.
 
 ### [`lib/ui/shared/widgets/feedback.dart`](../lib/ui/shared/widgets/feedback.dart)
 `showMessage()` affiche un SnackBar (coloré en cas d'erreur) qui se retire par un glissement horizontal et disparaît seul après sa durée, même s'il a une action (`persist: false`). `toggleFavorite()` bascule un favori et affiche l'erreur éventuelle.

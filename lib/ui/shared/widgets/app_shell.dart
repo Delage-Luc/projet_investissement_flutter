@@ -17,6 +17,7 @@ class AppShell extends StatelessWidget {
     _Tab(Icons.show_chart_outlined, Icons.show_chart_rounded, 'Marché'),
     _Tab(Icons.star_border_rounded, Icons.star_rounded, 'Favoris'),
     _Tab(Icons.calculate_outlined, Icons.calculate_rounded, 'Simulateur'),
+    _Tab(Icons.menu_book_outlined, Icons.menu_book_rounded, 'Lexique'),
   ];
 
   @override

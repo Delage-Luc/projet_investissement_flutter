@@ -7,9 +7,12 @@ import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.d
 /// Ouvert depuis un écran avec [initialTermId], la notion est dépliée et
 /// amenée à l'écran.
 class GlossaryPage extends StatefulWidget {
-  const GlossaryPage({super.key, this.initialTermId});
+  const GlossaryPage({super.key, this.initialTermId, this.asTab = false});
 
   final String? initialTermId;
+
+  /// Affiché comme onglet de la barre du bas (et non par-dessus une page).
+  final bool asTab;
 
   @override
   State<GlossaryPage> createState() => _GlossaryPageState();
@@ -54,10 +57,14 @@ class _GlossaryPageState extends State<GlossaryPage> {
   Widget build(BuildContext context) {
     final entries = _entries;
     return Scaffold(
-      appBar: AppBar(
-        title: const PageTitle('Lexique'),
-        actions: const [AppBarActions()],
-      ),
+      // Onglet : même barre que les autres onglets. Notion ouverte depuis
+      // un lien : barre avec retour arrière.
+      appBar: widget.asTab
+          ? const CustomAppBar(title: 'Lexique')
+          : AppBar(
+              title: const PageTitle('Lexique'),
+              actions: const [AppBarActions()],
+            ),
       body: Column(
         children: [
           Padding(
