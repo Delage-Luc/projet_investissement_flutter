@@ -6,6 +6,8 @@ import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_re
 import 'package:projet_investissement_flutter/utils/async_state.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:provider/provider.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 
 /// Résultat d'une simulation sauvegardée, relu depuis SQLite (hors connexion).
 class SavedSimulationDetailPage extends StatelessWidget {
@@ -32,17 +34,22 @@ class SavedSimulationDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(sim.name),
+        title: PageTitle(sim.name),
         actions: [
-          IconButton(
-            tooltip: 'Supprimer',
-            icon: const Icon(Icons.delete_outline),
-            onPressed: () {
-              // La suppression lit ses dépendances tout de suite, puis on
-              // revient à la liste où le SnackBar « Annuler » s'affiche.
-              deleteSavedSimulation(context, sim);
-              context.pop();
-            },
+          AppBarActions(
+            children: [
+              IconButton(
+                tooltip: 'Supprimer',
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.delete_outline_rounded, size: 21),
+                onPressed: () {
+                  // La suppression lit ses dépendances tout de suite, puis
+                  // on revient à la liste où le SnackBar « Annuler » s'affiche.
+                  deleteSavedSimulation(context, sim);
+                  context.pop();
+                },
+              ),
+            ],
           ),
         ],
       ),

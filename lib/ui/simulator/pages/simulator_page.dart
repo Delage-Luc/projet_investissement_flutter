@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +18,7 @@ import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_fo
 import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_result_view.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:provider/provider.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 
 /// Tailles de la fiche résultat, en fraction de la hauteur disponible.
 /// Partagées entre la fiche et l'espace réservé sous le formulaire.
@@ -185,23 +188,19 @@ class _DcaIntro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    return ExpansionTile(
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      glow: colors.brand.first,
+      child: ExpansionTile(
       initiallyExpanded: true,
-      backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-      collapsedBackgroundColor: Theme.of(context)
-          .colorScheme
-          .secondaryContainer,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-        side: BorderSide(color: colors.highlight),
-      ),
-      collapsedShape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(22),
-        side: BorderSide(color: colors.highlight),
-      ),
+      backgroundColor: colors.brand.first.withValues(alpha: 0.10),
+      collapsedBackgroundColor: colors.brand.first.withValues(alpha: 0.10),
+      shape: const RoundedRectangleBorder(),
+      collapsedShape: const RoundedRectangleBorder(),
       leading: Icon(
-        Icons.auto_stories_outlined,
-        color: Theme.of(context).colorScheme.onSurface,
+        Icons.auto_awesome_rounded,
+        size: 28,
+        color: Theme.of(context).colorScheme.primary,
       ),
       title: Text(
         'Qu\'est-ce que le DCA ?',
@@ -219,6 +218,7 @@ class _DcaIntro extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -283,27 +283,37 @@ class _ResultSection extends StatelessWidget {
       snapSizes: _SheetSizes.snaps,
       builder: (context, scrollController) => Material(
         elevation: 0,
-        color: AppColors.of(context).card,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          side: BorderSide(color: Theme.of(context).colorScheme.onSurface),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(34)),
+          side: BorderSide(color: AppColors.of(context).brand[1], width: 1.4),
         ),
         clipBehavior: Clip.antiAlias,
-        child: ListView(
+        child: BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: AppColors.of(context).floating.withValues(alpha: 0.82),
+            ),
+            child: ListView(
           controller: scrollController,
           padding: EdgeInsets.zero,
           children: [
-            Container(
-              width: double.infinity,
-              color: AppColors.of(context).highlight,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
               child: Center(
                 child: Container(
-                  width: 40,
-                  height: 5,
+                  width: 56,
+                  height: 6,
                   decoration: BoxDecoration(
-                    color: AppColors.of(context).onHighlight,
-                    borderRadius: BorderRadius.circular(2),
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.of(context).brand[1],
+                        blurRadius: 12,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -316,7 +326,10 @@ class _ResultSection extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text('Résultat', style: textTheme.titleLarge),
+                        child: Text(
+                          'Résultat',
+                          style: textTheme.headlineMedium,
+                        ),
                       ),
                       FilledButton.tonalIcon(
                         onPressed: () => _save(context),
@@ -336,6 +349,8 @@ class _ResultSection extends StatelessWidget {
               ),
             ),
           ],
+            ),
+          ),
         ),
       ),
     );

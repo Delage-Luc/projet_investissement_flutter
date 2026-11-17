@@ -9,6 +9,8 @@ import 'package:projet_investissement_flutter/ui/shared/widgets/percent_chip.dar
 import 'package:projet_investissement_flutter/utils/async_state.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:provider/provider.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 
 /// Historique des simulations : glisser une ligne ou appuyer sur la
 /// corbeille pour la supprimer.
@@ -21,7 +23,10 @@ class SavedSimulationsPage extends StatelessWidget {
     final state = vm.state;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Simulations sauvegardées')),
+      appBar: AppBar(
+        title: const PageTitle('Simulations sauvegardées'),
+        actions: const [AppBarActions()],
+      ),
       body: Builder(
         builder: (context) {
           if (!state.hasData) {

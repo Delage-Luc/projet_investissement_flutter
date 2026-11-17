@@ -4,6 +4,8 @@ import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/favorites/view_models/favorites_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/widgets/asset_tile.dart';
+import 'package:projet_investissement_flutter/ui/market/widgets/ticker_tape.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/feedback.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/error_view.dart';
@@ -26,17 +28,17 @@ class MarketPage extends StatelessWidget {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: TextField(
               onChanged: market.setQuery,
               decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: Icon(Icons.search_rounded),
                 hintText: 'Rechercher une crypto',
-                border: OutlineInputBorder(),
-                isDense: true,
               ),
             ),
           ),
+          // Bandeau décoratif : variations 24 h des actifs déjà chargés.
+          if (state.hasData) TickerTape(assets: state.data!),
           if (state.isLoading) const LinearProgressIndicator(),
           if (state.hasData && state.lastUpdated != null)
             StatusBanner(
@@ -82,14 +84,17 @@ class MarketPage extends StatelessWidget {
               itemCount: assets.length,
               itemBuilder: (context, index) {
                 final asset = assets[index];
-                return AssetTile(
+                return FadeSlideIn(
                   // Conserve l'état de chaque ligne quand la liste est filtrée.
                   key: ValueKey(asset.id),
-                  asset: asset,
-                  vsCurrency: market.vsCurrency,
-                  isFavorite: favorites.isFavorite(asset.id),
-                  onTap: () => context.push(Routes.asset(asset.id)),
-                  onToggleFavorite: () => toggleFavorite(context, asset.id),
+                  index: index,
+                  child: AssetTile(
+                    asset: asset,
+                    vsCurrency: market.vsCurrency,
+                    isFavorite: favorites.isFavorite(asset.id),
+                    onTap: () => context.push(Routes.asset(asset.id)),
+                    onToggleFavorite: () => toggleFavorite(context, asset.id),
+                  ),
                 );
               },
             ),

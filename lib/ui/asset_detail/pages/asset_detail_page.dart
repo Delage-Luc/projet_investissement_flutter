@@ -18,6 +18,8 @@ import 'package:projet_investissement_flutter/ui/shared/widgets/status_banner.da
 import 'package:projet_investissement_flutter/utils/async_state.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:provider/provider.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 
 /// Fiche d'un actif, avec un ViewModel conservé pendant la navigation.
 class AssetDetailPage extends StatelessWidget {
@@ -27,11 +29,17 @@ class AssetDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // La devise peut changer depuis cette page : la clé recrée alors le
+    // ViewModel, qui recharge l'historique dans la nouvelle devise.
+    final vsCurrency = context.select<SettingsViewModel, String>(
+      (s) => s.vsCurrency,
+    );
     return ChangeNotifierProvider(
+      key: ValueKey(vsCurrency),
       create: (context) => AssetDetailViewModel(
         repository: context.read<MarketRepository>(),
         assetId: assetId,
-        vsCurrency: context.read<SettingsViewModel>().vsCurrency,
+        vsCurrency: vsCurrency,
       )..load(),
       child: _AssetDetailView(assetId: assetId),
     );
@@ -54,11 +62,15 @@ class _AssetDetailView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(asset?.name ?? assetId),
+        title: PageTitle(asset?.name ?? assetId),
         actions: [
-          FavoriteButton(
-            isFavorite: favorites.isFavorite(assetId),
-            onPressed: () => toggleFavorite(context, assetId),
+          AppBarActions(
+            children: [
+              FavoriteButton(
+                isFavorite: favorites.isFavorite(assetId),
+                onPressed: () => toggleFavorite(context, assetId),
+              ),
+            ],
           ),
         ],
       ),
@@ -87,10 +99,14 @@ class _AssetDetailView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Flexible(
-                          child: Text(
-                            Formatters.price(asset.currentPrice, vs),
-                            style: Theme.of(context).textTheme.displaySmall
-                                ?.copyWith(fontFeatures: tabularFigures),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: GradientText(
+                              Formatters.price(asset.currentPrice, vs),
+                              style: Theme.of(context).textTheme.displayMedium
+                                  ?.copyWith(fontFeatures: tabularFigures),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -115,7 +131,11 @@ class _AssetDetailView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  _buildChart(context, detail, vs),
+                  GlassCard(
+                    padding: const EdgeInsets.fromLTRB(8, 18, 8, 12),
+                    glow: pnlColor(context, detail.performance),
+                    child: _buildChart(context, detail, vs),
+                  ),
                   const SizedBox(height: 16),
                   StatsGrid(
                     performance: detail.performance,

@@ -4,6 +4,7 @@ import 'package:projet_investissement_flutter/domain/models/price_point.dart';
 import 'package:projet_investissement_flutter/domain/models/risk.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/chart_axes.dart';
 
 /// Courbe des prix avec la date et le cours au toucher.
 /// Si [drawdown] est fourni, la pire baisse est surlignée du sommet au creux.
@@ -37,9 +38,11 @@ class PriceChart extends StatelessWidget {
         FlSpot(i.toDouble(), points[i].price),
     ];
     final prices = points.map((p) => p.price);
-    final minY = prices.reduce((a, b) => a < b ? a : b);
-    final maxY = prices.reduce((a, b) => a > b ? a : b);
-    final padding = (maxY - minY) * 0.08;
+    final y = AxisRange.from(
+      prices.reduce((a, b) => a < b ? a : b),
+      prices.reduce((a, b) => a > b ? a : b),
+    );
+    final lastIndex = points.length - 1;
     final labelStyle = Theme.of(context).textTheme.bodySmall;
     final declineColor = Theme.of(context).colorScheme.error;
     final dd = drawdown;
@@ -52,11 +55,21 @@ class PriceChart extends StatelessWidget {
           height: 240,
           child: LineChart(
             LineChartData(
-              minY: minY - padding,
-              maxY: maxY + padding,
-              gridData: const FlGridData(show: false),
-              titlesData: const FlTitlesData(show: false),
-              borderData: FlBorderData(show: false),
+              minY: y.min,
+              maxY: y.max,
+              // Axes : prix à gauche, quatre dates réparties en bas.
+              gridData: ChartAxes.grid(context, y),
+              borderData: ChartAxes.border(context),
+              titlesData: ChartAxes.titles(
+                context,
+                y: y,
+                leftLabel: (v) => Formatters.compactMoney(v, vsCurrency),
+                bottomInterval: lastIndex / 3,
+                bottomLabel: (v) {
+                  final i = v.round().clamp(0, lastIndex);
+                  return Formatters.shortDate(points[i].date);
+                },
+              ),
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
                   getTooltipColor: (_) => AppColors.of(context).tooltip,
@@ -81,12 +94,25 @@ class PriceChart extends StatelessWidget {
                   spots: spots,
                   isCurved: true,
                   curveSmoothness: 0.15,
+                  // Trait néon : couleur de la tendance et halo.
                   color: color,
-                  barWidth: 2.5,
+                  barWidth: 3,
+                  isStrokeCapRound: true,
+                  shadow: Shadow(
+                    color: color.withValues(alpha: 0.7),
+                    blurRadius: 14,
+                  ),
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: color.withValues(alpha: 0.12),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        color.withValues(alpha: 0.22),
+                        color.withValues(alpha: 0),
+                      ],
+                    ),
                   ),
                 ),
                 if (showDecline)
@@ -95,7 +121,11 @@ class PriceChart extends StatelessWidget {
                     isCurved: true,
                     curveSmoothness: 0.15,
                     color: declineColor,
-                    barWidth: 3.5,
+                    barWidth: 4,
+                    shadow: Shadow(
+                      color: declineColor.withValues(alpha: 0.9),
+                      blurRadius: 16,
+                    ),
                     // Points uniquement au sommet et au creux.
                     dotData: FlDotData(
                       show: true,
@@ -103,7 +133,7 @@ class PriceChart extends StatelessWidget {
                           spot.x == dd.peakIndex || spot.x == dd.troughIndex,
                       getDotPainter: (spot, _, _, _) => FlDotCirclePainter(
                         radius: 5,
-                        color: Theme.of(context).colorScheme.surface,
+                        color: AppColors.of(context).base,
                         strokeWidth: 3,
                         strokeColor: declineColor,
                       ),
@@ -112,14 +142,6 @@ class PriceChart extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(Formatters.date(points.first.date), style: labelStyle),
-            Text(Formatters.date(points.last.date), style: labelStyle),
-          ],
         ),
         if (showDecline) ...[
           const SizedBox(height: 6),

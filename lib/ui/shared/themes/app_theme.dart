@@ -1,134 +1,133 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-/// Direction artistique « Carnet » : un carnet de notes d'investisseur.
+/// Direction artistique « Aurora ».
 ///
-/// - Clair : papier crème, encre presque noire, accent indigo, surligneur
-///   safran. Sombre : encre de nuit, papier devenu texte, accent safran.
-/// - Titres en serif (police système, aucune dépendance réseau) pour un ton
-///   éditorial ; chiffres à chasse fixe pour que les montants s'alignent.
-/// - Cartes plates bordées d'un trait fin plutôt qu'ombrées, coins généreux,
-///   boutons en pilule : on s'éloigne volontairement du Material par défaut.
+/// Une aurore boréale animée en fond de toute l'application ([AuroraBackground]),
+/// des cartes en verre translucide posées dessus, des accents néon et une
+/// typographie XXL en dégradé.
+///
+/// - Sombre (identité principale) : nuit spatiale, violet → cyan, accent lime.
+/// - Clair : nacre lavande, aurore pastel, violet → bleu ciel.
+///
+/// Les écrans gardent un fond transparent : c'est l'aurore, dessinée une seule
+/// fois au-dessus du routeur, qui sert de fond à toutes les pages.
 class AppTheme {
   const AppTheme._();
-
-  /// Police des titres : la serif du système (Noto Serif sur Android).
-  static const String displayFont = 'serif';
 
   static ThemeData get light => _build(_lightPalette);
   static ThemeData get dark => _build(_darkPalette);
 
-  static const _Palette _lightPalette = _Palette(
-    brightness: Brightness.light,
-    background: Color(0xFFF4EFE6),
-    surface: Color(0xFFFFFBF4),
-    surfaceAlt: Color(0xFFEAE3D5),
-    ink: Color(0xFF1C1B22),
-    inkSoft: Color(0xFF615C69),
-    line: Color(0xFFD9D0BF),
-    primary: Color(0xFF3730A3),
-    onPrimary: Color(0xFFFFFBF4),
-    highlight: Color(0xFFF2A541),
-    onHighlight: Color(0xFF1C1B22),
-    teal: Color(0xFF1E8C80),
-    gain: Color(0xFF1B8A5A),
-    loss: Color(0xFFD1434B),
-    warning: Color(0xFFC77A0A),
-    navBar: Color(0xFF1C1B22),
-    onNavBar: Color(0xFFF4EFE6),
-  );
-
   static const _Palette _darkPalette = _Palette(
     brightness: Brightness.dark,
-    background: Color(0xFF111017),
-    surface: Color(0xFF1A1921),
-    surfaceAlt: Color(0xFF25232E),
-    ink: Color(0xFFF2ECE1),
-    inkSoft: Color(0xFFA7A1B1),
-    line: Color(0xFF33303D),
-    primary: Color(0xFFF2B04E),
-    onPrimary: Color(0xFF1A1405),
-    highlight: Color(0xFFF2B04E),
-    onHighlight: Color(0xFF1A1405),
-    teal: Color(0xFF5CC8B8),
-    gain: Color(0xFF4CC38A),
-    loss: Color(0xFFFF6B6B),
-    warning: Color(0xFFF5B94A),
-    navBar: Color(0xFF1F1D27),
-    onNavBar: Color(0xFFF2ECE1),
+    base: Color(0xFF07060F),
+    aurora: [Color(0xFF7C3AED), Color(0xFF06B6D4), Color(0xFFDB2777)],
+    ink: Color(0xFFF5F3FF),
+    inkSoft: Color(0xFFA5A0C4),
+    glassFill: Color(0x14FFFFFF),
+    glassFillStrong: Color(0x22FFFFFF),
+    glassBorder: Color(0x33FFFFFF),
+    primary: Color(0xFFA78BFA),
+    onPrimary: Color(0xFF12082B),
+    secondary: Color(0xFF22D3EE),
+    highlight: Color(0xFFC6F432),
+    onHighlight: Color(0xFF0B0D02),
+    gain: Color(0xFF34F5A0),
+    loss: Color(0xFFFF4D79),
+    warning: Color(0xFFFFC23D),
+    panel: Color(0xEE15122A),
+    onPanel: Color(0xFFF5F3FF),
+    brand: [Color(0xFFA78BFA), Color(0xFF22D3EE), Color(0xFFC6F432)],
+  );
+
+  static const _Palette _lightPalette = _Palette(
+    brightness: Brightness.light,
+    base: Color(0xFFF4F1FF),
+    aurora: [Color(0xFFC4B5FD), Color(0xFF99F6E4), Color(0xFFFBCFE8)],
+    ink: Color(0xFF130F26),
+    inkSoft: Color(0xFF5B5675),
+    glassFill: Color(0xA6FFFFFF),
+    glassFillStrong: Color(0xD9FFFFFF),
+    glassBorder: Color(0xCCFFFFFF),
+    primary: Color(0xFF6D28D9),
+    onPrimary: Color(0xFFFFFFFF),
+    secondary: Color(0xFF0284C7),
+    highlight: Color(0xFFDB2777),
+    onHighlight: Color(0xFFFFFFFF),
+    gain: Color(0xFF059669),
+    loss: Color(0xFFE11D48),
+    warning: Color(0xFFD97706),
+    panel: Color(0xF2130F26),
+    onPanel: Color(0xFFF5F3FF),
+    brand: [Color(0xFF6D28D9), Color(0xFFDB2777), Color(0xFF0284C7)],
   );
 
   static ThemeData _build(_Palette p) {
+    final isDark = p.brightness == Brightness.dark;
     final scheme = ColorScheme(
       brightness: p.brightness,
       primary: p.primary,
       onPrimary: p.onPrimary,
-      primaryContainer: Color.alphaBlend(
-        p.primary.withValues(alpha: 0.14),
-        p.surface,
-      ),
+      primaryContainer: p.glassFillStrong,
       onPrimaryContainer: p.ink,
-      secondary: p.highlight,
-      onSecondary: p.onHighlight,
+      secondary: p.secondary,
+      onSecondary: p.onPrimary,
       secondaryContainer: Color.alphaBlend(
-        p.highlight.withValues(alpha: 0.22),
-        p.surface,
+        p.primary.withValues(alpha: 0.18),
+        p.glassFill,
       ),
       onSecondaryContainer: p.ink,
-      tertiary: p.teal,
-      onTertiary: p.surface,
-      tertiaryContainer: Color.alphaBlend(
-        p.teal.withValues(alpha: 0.18),
-        p.surface,
-      ),
+      tertiary: p.highlight,
+      onTertiary: p.onHighlight,
+      tertiaryContainer: p.glassFillStrong,
       onTertiaryContainer: p.ink,
       error: p.loss,
-      onError: p.surface,
+      onError: Colors.white,
       errorContainer: Color.alphaBlend(
-        p.loss.withValues(alpha: 0.16),
-        p.surface,
+        p.loss.withValues(alpha: 0.22),
+        isDark ? const Color(0xFF15122A) : Colors.white,
       ),
       onErrorContainer: p.ink,
-      surface: p.background,
+      surface: p.base,
       onSurface: p.ink,
       onSurfaceVariant: p.inkSoft,
-      surfaceContainerLowest: p.surface,
-      surfaceContainerLow: p.surface,
-      surfaceContainer: p.surface,
-      surfaceContainerHigh: p.surfaceAlt,
-      surfaceContainerHighest: p.surfaceAlt,
+      surfaceContainerLowest: p.glassFill,
+      surfaceContainerLow: p.glassFill,
+      surfaceContainer: p.glassFill,
+      surfaceContainerHigh: p.glassFillStrong,
+      surfaceContainerHighest: p.glassFillStrong,
       outline: p.inkSoft,
-      outlineVariant: p.line,
-      inverseSurface: p.ink,
-      onInverseSurface: p.background,
+      outlineVariant: p.glassBorder,
+      inverseSurface: p.panel,
+      onInverseSurface: p.onPanel,
       inversePrimary: p.highlight,
       shadow: Colors.black,
       scrim: Colors.black,
       surfaceTint: Colors.transparent,
     );
 
-    final base = ThemeData(
-      useMaterial3: true,
-      colorScheme: scheme,
-      brightness: p.brightness,
-    );
+    final base = ThemeData(useMaterial3: true, colorScheme: scheme);
     final text = _textTheme(base.textTheme, p);
-    const radius = 22.0;
-    final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(radius),
-      side: BorderSide(color: p.line),
-    );
     final pill = RoundedRectangleBorder(borderRadius: BorderRadius.circular(40));
     final fieldBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16),
-      borderSide: BorderSide(color: p.line),
+      borderRadius: BorderRadius.circular(20),
+      borderSide: BorderSide(color: p.glassBorder),
     );
+    // Fond opaque pour ce qui flotte au-dessus du contenu (menus, dialogues).
+    final floating = isDark ? const Color(0xFF17142C) : const Color(0xFFFFFFFF);
 
     return base.copyWith(
-      scaffoldBackgroundColor: p.background,
-      canvasColor: p.background,
+      // Transparent : l'aurore animée sert de fond à toutes les pages.
+      scaffoldBackgroundColor: Colors.transparent,
+      canvasColor: floating,
       textTheme: text,
-      dividerColor: p.line,
+      dividerColor: p.glassBorder,
       splashFactory: InkSparkle.splashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        },
+      ),
       extensions: [
         AppColors(
           gain: p.gain,
@@ -136,100 +135,96 @@ class AppTheme {
           warning: p.warning,
           highlight: p.highlight,
           onHighlight: p.onHighlight,
-          line: p.line,
-          card: p.surface,
-          cardAlt: p.surfaceAlt,
-          tooltip: p.navBar,
-          onTooltip: p.onNavBar,
+          line: p.glassBorder,
+          card: p.glassFill,
+          cardAlt: p.glassFillStrong,
+          tooltip: p.panel,
+          onTooltip: p.onPanel,
+          base: p.base,
+          aurora: p.aurora,
+          brand: p.brand,
+          floating: floating,
         ),
       ],
       appBarTheme: AppBarTheme(
-        backgroundColor: p.background,
+        backgroundColor: Colors.transparent,
         foregroundColor: p.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        // Icônes de la barre d'état lisibles sur l'aurore (claire ou sombre).
+        systemOverlayStyle: isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
         centerTitle: false,
         titleSpacing: 20,
-        // Taille explicite : le textTheme de ThemeData n'a pas encore ses
-        // tailles ici (elles sont fusionnées plus tard par Theme.of).
+        toolbarHeight: 72,
         titleTextStyle: TextStyle(
           color: p.ink,
-          fontFamily: displayFont,
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.6,
+          fontSize: 34,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.4,
+          height: 1,
         ),
         iconTheme: IconThemeData(color: p.ink),
         actionsIconTheme: IconThemeData(color: p.ink),
       ),
       cardTheme: CardThemeData(
         margin: EdgeInsets.zero,
-        color: p.surface,
+        color: p.glassFill,
         surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         elevation: 0,
-        shape: cardShape,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(26),
+          side: BorderSide(color: p.glassBorder),
+        ),
       ),
       listTileTheme: ListTileThemeData(
         iconColor: p.inkSoft,
-        titleTextStyle: text.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        titleTextStyle: text.titleMedium,
         subtitleTextStyle: text.bodyMedium?.copyWith(color: p.inkSoft),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: p.navBar,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        height: 72,
-        indicatorColor: p.highlight,
-        indicatorShape: pill,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        iconTheme: WidgetStateProperty.resolveWith(
-          (states) => IconThemeData(
-            color: states.contains(WidgetState.selected)
-                ? p.onHighlight
-                : p.onNavBar.withValues(alpha: 0.7),
-          ),
-        ),
-        labelTextStyle: WidgetStateProperty.resolveWith(
-          (states) => text.labelMedium?.copyWith(
-            color: states.contains(WidgetState.selected)
-                ? p.onNavBar
-                : p.onNavBar.withValues(alpha: 0.7),
-            fontWeight: states.contains(WidgetState.selected)
-                ? FontWeight.w800
-                : FontWeight.w500,
-            letterSpacing: 0.3,
-          ),
-        ),
-      ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: p.ink,
-          foregroundColor: p.background,
-          disabledBackgroundColor: p.line,
-          shape: pill,
-          minimumSize: const Size(0, 52),
-          padding: const EdgeInsets.symmetric(horizontal: 22),
-          textStyle: text.labelLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.4,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.disabled)
+                ? p.glassFillStrong
+                : p.primary,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.disabled) ? p.inkSoft : p.onPrimary,
+          ),
+          // Ombre colorée : le bouton « brille » au lieu d'être ombré.
+          elevation: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.disabled) ? 0 : 10,
+          ),
+          shadowColor: WidgetStatePropertyAll(p.primary.withValues(alpha: 0.8)),
+          shape: WidgetStatePropertyAll(pill),
+          minimumSize: const WidgetStatePropertyAll(Size(0, 56)),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: 24),
+          ),
+          textStyle: WidgetStatePropertyAll(
+            text.labelLarge?.copyWith(
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.6,
+            ),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: p.ink,
-          side: BorderSide(color: p.ink, width: 1.4),
+          side: BorderSide(color: p.glassBorder, width: 1.4),
           shape: pill,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: p.brightness == Brightness.light
-              ? p.primary
-              : p.highlight,
+          foregroundColor: isDark ? p.highlight : p.primary,
           shape: pill,
-          textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
@@ -238,86 +233,94 @@ class AppTheme {
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           shape: WidgetStatePropertyAll(pill),
-          side: WidgetStatePropertyAll(BorderSide(color: p.ink, width: 1.2)),
+          side: WidgetStatePropertyAll(BorderSide(color: p.glassBorder)),
           backgroundColor: WidgetStateProperty.resolveWith(
-            (s) => s.contains(WidgetState.selected) ? p.ink : p.surface,
+            (s) => s.contains(WidgetState.selected) ? p.primary : p.glassFill,
           ),
           foregroundColor: WidgetStateProperty.resolveWith(
-            (s) => s.contains(WidgetState.selected) ? p.background : p.ink,
+            (s) => s.contains(WidgetState.selected) ? p.onPrimary : p.ink,
           ),
           textStyle: WidgetStatePropertyAll(
-            text.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+            text.labelLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
+          minimumSize: const WidgetStatePropertyAll(Size(0, 46)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: p.surface,
+        fillColor: p.glassFill,
         border: fieldBorder,
         enabledBorder: fieldBorder,
         disabledBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: p.line.withValues(alpha: 0.5)),
+          borderSide: BorderSide(color: p.glassBorder.withValues(alpha: 0.4)),
         ),
         focusedBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: p.ink, width: 1.6),
+          borderSide: BorderSide(color: p.secondary, width: 2),
         ),
         errorBorder: fieldBorder.copyWith(
           borderSide: BorderSide(color: p.loss),
         ),
         focusedErrorBorder: fieldBorder.copyWith(
-          borderSide: BorderSide(color: p.loss, width: 1.6),
+          borderSide: BorderSide(color: p.loss, width: 2),
         ),
         labelStyle: TextStyle(color: p.inkSoft),
         floatingLabelStyle: TextStyle(
-          color: p.ink,
-          fontWeight: FontWeight.w700,
+          color: p.secondary,
+          fontWeight: FontWeight.w800,
         ),
+        hintStyle: TextStyle(color: p.inkSoft),
         prefixIconColor: p.inkSoft,
-        suffixStyle: TextStyle(color: p.inkSoft, fontWeight: FontWeight.w600),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        suffixStyle: TextStyle(color: p.inkSoft, fontWeight: FontWeight.w700),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       ),
       dropdownMenuTheme: DropdownMenuThemeData(
         menuStyle: MenuStyle(
-          backgroundColor: WidgetStatePropertyAll(p.surface),
+          backgroundColor: WidgetStatePropertyAll(floating),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
       ),
       popupMenuTheme: PopupMenuThemeData(
-        color: p.surface,
+        color: floating,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: p.line),
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: p.glassBorder),
         ),
-        textStyle: text.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+        textStyle: text.titleSmall?.copyWith(fontWeight: FontWeight.w800),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: p.surface,
+        backgroundColor: floating,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(28),
-          side: BorderSide(color: p.line),
+          borderRadius: BorderRadius.circular(32),
+          side: BorderSide(color: p.glassBorder),
         ),
         titleTextStyle: TextStyle(
           color: p.ink,
-          fontFamily: displayFont,
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
+          fontSize: 26,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.8,
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: p.navBar,
-        contentTextStyle: text.bodyMedium?.copyWith(color: p.onNavBar),
-        actionTextColor: p.highlight,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        backgroundColor: p.panel,
+        contentTextStyle: text.bodyMedium?.copyWith(
+          color: p.onPanel,
+          fontWeight: FontWeight.w600,
+        ),
+        actionTextColor: isDark ? p.highlight : const Color(0xFFC4B5FD),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(22),
+          side: BorderSide(color: p.primary.withValues(alpha: 0.6)),
+        ),
         elevation: 0,
       ),
       expansionTileTheme: ExpansionTileThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
         collapsedShape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: BorderRadius.circular(26),
         ),
         iconColor: p.ink,
         collapsedIconColor: p.inkSoft,
@@ -325,50 +328,51 @@ class AppTheme {
         collapsedTextColor: p.ink,
       ),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: p.brightness == Brightness.light ? p.primary : p.highlight,
-        linearTrackColor: p.surfaceAlt,
+        color: p.secondary,
+        linearTrackColor: p.glassFill,
         circularTrackColor: Colors.transparent,
       ),
-      dividerTheme: DividerThemeData(color: p.line, thickness: 1, space: 1),
+      dividerTheme: DividerThemeData(color: p.glassBorder, thickness: 1, space: 1),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: p.surface,
+        backgroundColor: floating,
         surfaceTintColor: Colors.transparent,
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: p.navBar,
-          borderRadius: BorderRadius.circular(10),
+          color: p.panel,
+          borderRadius: BorderRadius.circular(12),
         ),
-        textStyle: TextStyle(color: p.onNavBar),
+        textStyle: TextStyle(color: p.onPanel),
       ),
     );
   }
 
   static TextTheme _textTheme(TextTheme base, _Palette p) {
-    // Ajoute les tailles Material 3 pour que les styles dérivés ci-dessous
-    // (barre, onglets, boutons…) aient une taille même hors de Theme.of.
+    // Tailles Material 3 incluses pour les styles utilisés hors Theme.of.
     final themed = Typography.englishLike2021
         .merge(base)
         .apply(bodyColor: p.ink, displayColor: p.ink);
-    TextStyle? serif(TextStyle? s, {FontWeight weight = FontWeight.w700}) =>
-        s?.copyWith(
-          fontFamily: displayFont,
-          fontWeight: weight,
-          letterSpacing: -0.5,
+    TextStyle? display(TextStyle? s, double spacing) => s?.copyWith(
+          fontWeight: FontWeight.w900,
+          letterSpacing: spacing,
+          height: 1.05,
         );
     return themed.copyWith(
-      displayLarge: serif(themed.displayLarge),
-      displayMedium: serif(themed.displayMedium),
-      displaySmall: serif(themed.displaySmall),
-      headlineLarge: serif(themed.headlineLarge),
-      headlineMedium: serif(themed.headlineMedium),
-      headlineSmall: serif(themed.headlineSmall),
-      titleLarge: serif(themed.titleLarge),
-      titleMedium: themed.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+      displayLarge: display(themed.displayLarge, -2.5),
+      displayMedium: display(themed.displayMedium, -2),
+      displaySmall: display(themed.displaySmall, -1.6),
+      headlineLarge: display(themed.headlineLarge, -1.4),
+      headlineMedium: display(themed.headlineMedium, -1.2),
+      headlineSmall: display(themed.headlineSmall, -1),
+      titleLarge: themed.titleLarge?.copyWith(
+        fontWeight: FontWeight.w900,
+        letterSpacing: -0.6,
+      ),
+      titleMedium: themed.titleMedium?.copyWith(fontWeight: FontWeight.w800),
       labelMedium: themed.labelMedium?.copyWith(
         color: p.inkSoft,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 0.8,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.1,
       ),
     );
   }
@@ -387,24 +391,44 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.cardAlt,
     required this.tooltip,
     required this.onTooltip,
+    required this.base,
+    required this.aurora,
+    required this.brand,
+    required this.floating,
   });
 
   final Color gain;
   final Color loss;
   final Color warning;
 
-  /// Surligneur safran (indicateurs, poignée de la fiche résultat…).
+  /// Accent néon (lime en sombre, magenta en clair).
   final Color highlight;
   final Color onHighlight;
 
-  /// Trait fin des cartes et séparateurs.
+  /// Bord et remplissages « verre ».
   final Color line;
   final Color card;
   final Color cardAlt;
 
-  /// Fond et texte des bulles d'information des graphiques.
+  /// Fond et texte des bulles des graphiques et des SnackBars.
   final Color tooltip;
   final Color onTooltip;
+
+  /// Couleur de fond sous l'aurore, et les trois couleurs de l'aurore.
+  final Color base;
+  final List<Color> aurora;
+
+  /// Dégradé de marque (titres, jauges, cartes mises en avant).
+  final List<Color> brand;
+
+  /// Fond opaque des éléments flottants (menus, dialogues).
+  final Color floating;
+
+  LinearGradient get brandGradient => LinearGradient(
+        colors: brand,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
 
   static AppColors of(BuildContext context) =>
       Theme.of(context).extension<AppColors>()!;
@@ -421,6 +445,10 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? cardAlt,
     Color? tooltip,
     Color? onTooltip,
+    Color? base,
+    List<Color>? aurora,
+    List<Color>? brand,
+    Color? floating,
   }) =>
       AppColors(
         gain: gain ?? this.gain,
@@ -433,11 +461,19 @@ class AppColors extends ThemeExtension<AppColors> {
         cardAlt: cardAlt ?? this.cardAlt,
         tooltip: tooltip ?? this.tooltip,
         onTooltip: onTooltip ?? this.onTooltip,
+        base: base ?? this.base,
+        aurora: aurora ?? this.aurora,
+        brand: brand ?? this.brand,
+        floating: floating ?? this.floating,
       );
 
   @override
   AppColors lerp(AppColors? other, double t) {
     if (other == null) return this;
+    List<Color> lerpList(List<Color> a, List<Color> b) => [
+          for (var i = 0; i < a.length && i < b.length; i++)
+            Color.lerp(a[i], b[i], t)!,
+        ];
     return AppColors(
       gain: Color.lerp(gain, other.gain, t)!,
       loss: Color.lerp(loss, other.loss, t)!,
@@ -449,6 +485,10 @@ class AppColors extends ThemeExtension<AppColors> {
       cardAlt: Color.lerp(cardAlt, other.cardAlt, t)!,
       tooltip: Color.lerp(tooltip, other.tooltip, t)!,
       onTooltip: Color.lerp(onTooltip, other.onTooltip, t)!,
+      base: Color.lerp(base, other.base, t)!,
+      aurora: lerpList(aurora, other.aurora),
+      brand: lerpList(brand, other.brand),
+      floating: Color.lerp(floating, other.floating, t)!,
     );
   }
 }
@@ -456,41 +496,45 @@ class AppColors extends ThemeExtension<AppColors> {
 class _Palette {
   const _Palette({
     required this.brightness,
-    required this.background,
-    required this.surface,
-    required this.surfaceAlt,
+    required this.base,
+    required this.aurora,
     required this.ink,
     required this.inkSoft,
-    required this.line,
+    required this.glassFill,
+    required this.glassFillStrong,
+    required this.glassBorder,
     required this.primary,
     required this.onPrimary,
+    required this.secondary,
     required this.highlight,
     required this.onHighlight,
-    required this.teal,
     required this.gain,
     required this.loss,
     required this.warning,
-    required this.navBar,
-    required this.onNavBar,
+    required this.panel,
+    required this.onPanel,
+    required this.brand,
   });
 
   final Brightness brightness;
-  final Color background;
-  final Color surface;
-  final Color surfaceAlt;
+  final Color base;
+  final List<Color> aurora;
   final Color ink;
   final Color inkSoft;
-  final Color line;
+  final Color glassFill;
+  final Color glassFillStrong;
+  final Color glassBorder;
   final Color primary;
   final Color onPrimary;
+  final Color secondary;
   final Color highlight;
   final Color onHighlight;
-  final Color teal;
   final Color gain;
   final Color loss;
   final Color warning;
-  final Color navBar;
-  final Color onNavBar;
+  final Color panel;
+  final Color onPanel;
+  final List<Color> brand;
 }
 
 /// Chiffres à chasse fixe : les montants restent alignés et ne « dansent »

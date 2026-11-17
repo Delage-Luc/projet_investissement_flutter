@@ -4,6 +4,7 @@ import 'package:projet_investissement_flutter/domain/models/glossary.dart';
 import 'package:projet_investissement_flutter/domain/models/risk.dart';
 import 'package:projet_investissement_flutter/ui/asset_detail/view_models/asset_detail_view_model.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/learn_more_link.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 
@@ -108,7 +109,8 @@ class InsightsCard extends StatelessWidget {
 
     if (items.isEmpty) return const SizedBox.shrink();
 
-    return Card(
+    return GlassCard(
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
         child: Column(
@@ -116,7 +118,7 @@ class InsightsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.lightbulb_outline),
+                const Icon(Icons.lightbulb_rounded),
                 const SizedBox(width: 8),
                 Text('Ce que ça signifie', style: textTheme.titleLarge),
               ],
@@ -176,7 +178,18 @@ class _Insight extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 20),
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color.withValues(alpha: 0.15),
+              border: Border.all(color: color.withValues(alpha: 0.5)),
+              boxShadow: [
+                BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 12),
+              ],
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

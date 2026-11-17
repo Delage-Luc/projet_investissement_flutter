@@ -3,6 +3,7 @@ import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/animated_number_text.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 
 /// Quatre indicateurs du résultat, dont les valeurs « défilent » à l'affichage.
 class ResultSummary extends StatelessWidget {
@@ -88,20 +89,27 @@ class _Metric extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final colors = AppColors.of(context);
-    return Card(
-      color: emphasized ? colors.highlight : null,
-      shape: emphasized
-          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(22))
+    final onEmphasized = Colors.white;
+    return GlassCard(
+      glow: emphasized ? colors.brand[1] : color,
+      gradient: emphasized
+          ? LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary,
+              ],
+            )
           : null,
+      padding: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label.toUpperCase(),
               style: textTheme.labelMedium?.copyWith(
-                color: emphasized ? colors.onHighlight : null,
+                color: emphasized ? onEmphasized : null,
               ),
             ),
             const SizedBox(height: 6),
@@ -109,10 +117,17 @@ class _Metric extends StatelessWidget {
               value: value,
               format: format,
               style: textTheme.titleLarge?.copyWith(
-                color: emphasized ? colors.onHighlight : color,
-                fontWeight: FontWeight.w800,
-                fontFamily: AppTheme.displayFont,
+                color: emphasized ? onEmphasized : color,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.8,
                 fontFeatures: tabularFigures,
+                shadows: [
+                  Shadow(
+                    color: (emphasized ? Colors.black : (color ?? colors.line))
+                        .withValues(alpha: 0.4),
+                    blurRadius: 12,
+                  ),
+                ],
               ),
             ),
           ],

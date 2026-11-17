@@ -9,6 +9,7 @@ import 'package:projet_investissement_flutter/ui/market/view_models/market_view_
 import 'package:projet_investissement_flutter/ui/saved_simulations/view_models/saved_simulations_view_model.dart';
 import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 import 'package:provider/provider.dart';
 
 /// Racine de l'app : dépendances, thème et routes.
@@ -62,6 +63,10 @@ class _AppState extends State<App> {
           darkTheme: AppTheme.dark,
           themeMode: settings.themeMode,
           routerConfig: _router,
+          // L'aurore animée est dessinée une seule fois, sous toutes les
+          // pages (dont le fond est transparent).
+          builder: (context, child) =>
+              AuroraBackground(child: child ?? const SizedBox.shrink()),
         ),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/chart_axes.dart';
 
 /// Capital versé (pointillés), valeur du portefeuille (trait plein) et,
 /// si fourni, la même somme investie en une fois ([comparison]).
@@ -74,12 +75,24 @@ class _ProjectionChartState extends State<ProjectionChart>
     final investedColor = scheme.outline;
     final comparisonColor = AppColors.of(context).highlight;
     final all = [...points, ...?comparison];
-    final maxY = all.map((p) => math.max(p.value, p.invested)).reduce(math.max);
-    final minY = all.map((p) => math.min(p.value, p.invested)).reduce(math.min);
-    final padding = (maxY - minY) * 0.06;
-    final years = points.last.month ~/ 12;
-    final labelStyle = Theme.of(context).textTheme.bodySmall;
-    final labels = ['Versé', 'Valeur (DCA)', 'Tout au départ'];
+    final y = AxisRange.from(
+      all.map((p) => math.min(p.value, p.invested)).reduce(math.min),
+      all.map((p) => math.max(p.value, p.invested)).reduce(math.max),
+      floorAtZero: true,
+    );
+    final months = points.last.month;
+    final years = months ~/ 12;
+    // Repères en bas : trimestres sur un an, sinon des années (5 au plus).
+    final double bottomInterval = years <= 1
+        ? 3
+        : 12.0 * ((years + 4) ~/ 5);
+    String? monthLabel(double v) {
+      final m = v.round();
+      if (m == 0) return 'Départ';
+      if (years <= 1) return '$m m';
+      return m % 12 == 0 ? 'An ${m ~/ 12}' : null;
+    }
+    final labels =['Versé', 'Valeur (DCA)', 'Tout au départ'];
 
     return Column(
       children: [
@@ -107,11 +120,19 @@ class _ProjectionChartState extends State<ProjectionChart>
                 LineChartData(
                   minX: 0,
                   maxX: (points.length - 1).toDouble(),
-                  minY: math.max(0, minY - padding),
-                  maxY: maxY + padding,
-                  gridData: const FlGridData(show: false),
-                  titlesData: const FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
+                  minY: y.min,
+                  maxY: y.max,
+                  // Axes : montants à gauche, mois ou années en bas.
+                  gridData: ChartAxes.grid(context, y),
+                  borderData: ChartAxes.border(context),
+                  titlesData: ChartAxes.titles(
+                    context,
+                    y: y,
+                    leftLabel: (v) =>
+                        Formatters.compactMoney(v, widget.vsCurrency),
+                    bottomInterval: bottomInterval,
+                    bottomLabel: monthLabel,
+                  ),
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipColor: (_) => AppColors.of(context).tooltip,
@@ -141,11 +162,23 @@ class _ProjectionChartState extends State<ProjectionChart>
                       isCurved: true,
                       curveSmoothness: 0.1,
                       color: valueColor,
-                      barWidth: 3,
+                      barWidth: 4,
+                      isStrokeCapRound: true,
+                      shadow: Shadow(
+                        color: valueColor.withValues(alpha: 0.8),
+                        blurRadius: 16,
+                      ),
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: valueColor.withValues(alpha: 0.12),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            valueColor.withValues(alpha: 0.35),
+                            valueColor.withValues(alpha: 0),
+                          ],
+                        ),
                       ),
                     ),
                     if (comparison != null)
@@ -154,8 +187,12 @@ class _ProjectionChartState extends State<ProjectionChart>
                         isCurved: true,
                         curveSmoothness: 0.1,
                         color: comparisonColor,
-                        barWidth: 2,
-                        dashArray: [2, 3],
+                        barWidth: 2.5,
+                        dashArray: [3, 4],
+                        shadow: Shadow(
+                          color: comparisonColor.withValues(alpha: 0.8),
+                          blurRadius: 10,
+                        ),
                         dotData: const FlDotData(show: false),
                       ),
                   ],
@@ -166,16 +203,14 @@ class _ProjectionChartState extends State<ProjectionChart>
         ),
         const SizedBox(height: 4),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Départ', style: labelStyle),
             IconButton(
               tooltip: 'Rejouer l\'animation',
               visualDensity: VisualDensity.compact,
-              icon: const Icon(Icons.replay, size: 18),
+              icon: const Icon(Icons.replay_rounded, size: 20),
               onPressed: () => _controller.forward(from: 0),
             ),
-            Text('Année $years', style: labelStyle),
           ],
         ),
         Wrap(

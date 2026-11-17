@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/animated_number_text.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 
 /// Trois indicateurs de période, chacun expliqué au toucher.
 class StatsGrid extends StatelessWidget {
@@ -81,9 +82,11 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Card(
+    return GlassCard(
+      glow: color ?? AppColors.of(context).brand[1],
+      padding: EdgeInsets.zero,
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(26),
         onTap: () => showGeneralDialog<void>(
           context: context,
           barrierDismissible: true,
@@ -111,7 +114,7 @@ class _StatCard extends StatelessWidget {
               ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(12, 14, 10, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -124,7 +127,7 @@ class _StatCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Icon(Icons.info_outline, size: 14),
+                  const Icon(Icons.info_outline_rounded, size: 15),
                 ],
               ),
               const SizedBox(height: 6),
@@ -133,8 +136,16 @@ class _StatCard extends StatelessWidget {
                 format: format,
                 style: textTheme.titleLarge?.copyWith(
                   color: color,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
                   fontFeatures: tabularFigures,
+                  shadows: [
+                    if (color != null)
+                      Shadow(
+                        color: color!.withValues(alpha: 0.6),
+                        blurRadius: 14,
+                      ),
+                  ],
                 ),
               ),
             ],

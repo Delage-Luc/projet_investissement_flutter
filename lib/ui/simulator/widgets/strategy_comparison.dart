@@ -6,6 +6,7 @@ import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/learn_more_link.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
 
 /// Compare le DCA à la même somme investie en une fois au départ, et
 /// explique pourquoi l'une des deux stratégies l'emporte sur ces données.
@@ -37,9 +38,11 @@ class StrategyComparison extends StatelessWidget {
     final diff = (dcaValue - lumpValue).abs();
     String money(double v) => Formatters.money(v, vsCurrency);
 
-    return Card(
+    return GlassCard(
+      glow: AppColors.of(context).highlight,
+      padding: EdgeInsets.zero,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -129,22 +132,20 @@ class _Bar extends StatelessWidget {
         Row(
           children: [
             Expanded(child: Text(label, style: textTheme.bodyMedium)),
-            Text(text, style: textTheme.labelLarge),
+            Text(
+              text,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                fontFeatures: tabularFigures,
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 4),
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: ratio.clamp(0.0, 1.0)),
-          duration: const Duration(milliseconds: 900),
-          curve: Curves.easeOutCubic,
-          builder: (context, v, _) => ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: v,
-              minHeight: 10,
-              color: color,
-            ),
-          ),
+        NeonBar(
+          value: ratio,
+          height: 12,
+          colors: [color.withValues(alpha: 0.55), color],
         ),
       ],
     );

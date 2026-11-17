@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/glossary.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/aurora.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 
 /// Lexique consultable hors connexion, avec recherche.
 /// Ouvert depuis un écran avec [initialTermId], la notion est dépliée et
@@ -52,7 +54,10 @@ class _GlossaryPageState extends State<GlossaryPage> {
   Widget build(BuildContext context) {
     final entries = _entries;
     return Scaffold(
-      appBar: AppBar(title: const Text('Lexique')),
+      appBar: AppBar(
+        title: const PageTitle('Lexique'),
+        actions: const [AppBarActions()],
+      ),
       body: Column(
         children: [
           Padding(
