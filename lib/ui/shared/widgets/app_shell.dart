@@ -11,7 +11,10 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: NavigationBar(
+      // Barre sombre aux coins arrondis : la « couverture » du carnet.
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        child: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) => navigationShell.goBranch(
           index,
@@ -33,6 +36,7 @@ class AppShell extends StatelessWidget {
             label: 'Simulateur',
           ),
         ],
+        ),
       ),
     );
   }

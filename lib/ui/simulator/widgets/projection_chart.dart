@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 
 /// Capital versé (pointillés), valeur du portefeuille (trait plein) et,
 /// si fourni, la même somme investie en une fois ([comparison]).
@@ -71,7 +72,7 @@ class _ProjectionChartState extends State<ProjectionChart>
     final scheme = Theme.of(context).colorScheme;
     final valueColor = scheme.primary;
     final investedColor = scheme.outline;
-    final comparisonColor = scheme.tertiary;
+    final comparisonColor = AppColors.of(context).highlight;
     final all = [...points, ...?comparison];
     final maxY = all.map((p) => math.max(p.value, p.invested)).reduce(math.max);
     final minY = all.map((p) => math.min(p.value, p.invested)).reduce(math.min);
@@ -113,12 +114,14 @@ class _ProjectionChartState extends State<ProjectionChart>
                   borderData: FlBorderData(show: false),
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
+                      getTooltipColor: (_) => AppColors.of(context).tooltip,
+                      tooltipBorderRadius: BorderRadius.circular(12),
                       getTooltipItems: (touched) => touched.map((spot) {
                         return LineTooltipItem(
                           '${labels[spot.barIndex]} : '
                           '${Formatters.money(spot.y, widget.vsCurrency)}',
-                          const TextStyle(
-                            color: Colors.white,
+                          TextStyle(
+                            color: AppColors.of(context).onTooltip,
                             fontWeight: FontWeight.w600,
                           ),
                         );

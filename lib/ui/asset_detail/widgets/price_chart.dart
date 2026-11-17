@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/price_point.dart';
 import 'package:projet_investissement_flutter/domain/models/risk.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 
 /// Courbe des prix avec la date et le cours au toucher.
@@ -58,6 +59,8 @@ class PriceChart extends StatelessWidget {
               borderData: FlBorderData(show: false),
               lineTouchData: LineTouchData(
                 touchTooltipData: LineTouchTooltipData(
+                  getTooltipColor: (_) => AppColors.of(context).tooltip,
+                  tooltipBorderRadius: BorderRadius.circular(12),
                   // Une seule bulle par position : celle de la courbe principale.
                   getTooltipItems: (touched) => touched.map((spot) {
                     if (spot.barIndex != 0) return null;
@@ -65,8 +68,8 @@ class PriceChart extends StatelessWidget {
                     return LineTooltipItem(
                       '${Formatters.date(point.date)}\n'
                       '${Formatters.price(point.price, vsCurrency)}',
-                      const TextStyle(
-                        color: Colors.white,
+                      TextStyle(
+                        color: AppColors.of(context).onTooltip,
                         fontWeight: FontWeight.w600,
                       ),
                     );

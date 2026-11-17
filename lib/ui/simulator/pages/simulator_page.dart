@@ -5,12 +5,13 @@ import 'package:projet_investissement_flutter/data/repositories/market_repositor
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
-import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
-import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
-import 'package:projet_investissement_flutter/ui/simulator/view_models/simulator_view_model.dart';
 import 'package:projet_investissement_flutter/ui/saved_simulations/view_models/saved_simulations_view_model.dart';
 import 'package:projet_investissement_flutter/ui/saved_simulations/widgets/save_simulation_dialog.dart';
+import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/feedback.dart';
+import 'package:projet_investissement_flutter/ui/simulator/view_models/simulator_view_model.dart';
 import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_form.dart';
 import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_result_view.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
@@ -183,15 +184,28 @@ class _DcaIntro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return ExpansionTile(
       initiallyExpanded: true,
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
       collapsedBackgroundColor: Theme.of(context)
           .colorScheme
           .secondaryContainer,
-      title: const Text(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: colors.highlight),
+      ),
+      collapsedShape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: colors.highlight),
+      ),
+      leading: Icon(
+        Icons.auto_stories_outlined,
+        color: Theme.of(context).colorScheme.onSurface,
+      ),
+      title: Text(
         'Qu\'est-ce que le DCA ?',
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.titleLarge,
       ),
       children: const [
         Padding(
@@ -268,9 +282,12 @@ class _ResultSection extends StatelessWidget {
       snap: true,
       snapSizes: _SheetSizes.snaps,
       builder: (context, scrollController) => Material(
-        elevation: 12,
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        elevation: 0,
+        color: AppColors.of(context).card,
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          side: BorderSide(color: Theme.of(context).colorScheme.onSurface),
+        ),
         clipBehavior: Clip.antiAlias,
         child: ListView(
           controller: scrollController,
@@ -278,14 +295,14 @@ class _ResultSection extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              color: Theme.of(context).colorScheme.secondary,
+              color: AppColors.of(context).highlight,
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Center(
                 child: Container(
-                  width: 36,
-                  height: 4,
+                  width: 40,
+                  height: 5,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.outlineVariant,
+                    color: AppColors.of(context).onHighlight,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

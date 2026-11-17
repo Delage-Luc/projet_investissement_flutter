@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/glossary.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/learn_more_link.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 
@@ -44,7 +45,7 @@ class StrategyComparison extends StatelessWidget {
           children: [
             Text(
               'Et si tu avais tout investi au départ ?',
-              style: textTheme.titleMedium,
+              style: textTheme.titleLarge?.copyWith(fontSize: 19),
             ),
             const SizedBox(height: 4),
             Text(
@@ -63,7 +64,7 @@ class StrategyComparison extends StatelessWidget {
             _Bar(
               label: 'Tout au départ',
               ratio: maxValue <= 0 ? 0 : lumpValue / maxValue,
-              color: scheme.tertiary,
+              color: AppColors.of(context).highlight,
               text: money(lumpValue),
             ),
             const SizedBox(height: 12),

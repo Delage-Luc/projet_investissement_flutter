@@ -115,6 +115,7 @@ class _GlossaryTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       key: targetKey,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: ExpansionTile(
         initiallyExpanded: initiallyExpanded,
         backgroundColor: scheme.secondaryContainer.withValues(alpha: 0.4),

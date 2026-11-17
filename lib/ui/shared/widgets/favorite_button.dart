@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 
 /// Bouton favori avec une animation à l'ajout.
 class FavoriteButton extends StatefulWidget {
@@ -64,7 +65,7 @@ class _FavoriteButtonState extends State<FavoriteButton>
         onPressed: widget.onPressed,
         icon: Icon(
           widget.isFavorite ? Icons.star : Icons.star_border,
-          color: widget.isFavorite ? Colors.amber.shade600 : null,
+          color: widget.isFavorite ? AppColors.of(context).highlight : null,
         ),
       ),
     );

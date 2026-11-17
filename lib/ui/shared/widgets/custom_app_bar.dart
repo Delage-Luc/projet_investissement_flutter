@@ -22,7 +22,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final settings = context.watch<SettingsViewModel>();
 
     return AppBar(
-      title: Text(title),
+      // Le grand titre serif rétrécit plutôt que d'être coupé quand
+      // l'écran ajoute ses propres actions.
+      title: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.centerLeft,
+        child: Text(title),
+      ),
       actions: [
         ...actions,
         IconButton(

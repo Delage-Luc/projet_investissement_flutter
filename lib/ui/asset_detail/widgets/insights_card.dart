@@ -118,7 +118,7 @@ class InsightsCard extends StatelessWidget {
               children: [
                 const Icon(Icons.lightbulb_outline),
                 const SizedBox(width: 8),
-                Text('Ce que ça signifie', style: textTheme.titleMedium),
+                Text('Ce que ça signifie', style: textTheme.titleLarge),
               ],
             ),
             const SizedBox(height: 12),
@@ -151,7 +151,7 @@ class InsightsCard extends StatelessWidget {
   static Color _levelColor(BuildContext context, VolatilityLevel level) =>
       switch (level) {
         VolatilityLevel.low => pnlColor(context, 1),
-        VolatilityLevel.moderate => Colors.orange.shade700,
+        VolatilityLevel.moderate => AppColors.of(context).warning,
         VolatilityLevel.high => pnlColor(context, -1),
       };
 }

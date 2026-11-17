@@ -86,13 +86,25 @@ class _AssetDetailView extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          Formatters.price(asset.currentPrice, vs),
-                          style: Theme.of(context).textTheme.headlineMedium,
+                        Flexible(
+                          child: Text(
+                            Formatters.price(asset.currentPrice, vs),
+                            style: Theme.of(context).textTheme.displaySmall
+                                ?.copyWith(fontFeatures: tabularFigures),
+                          ),
                         ),
-                        const SizedBox(width: 8),
-                        PercentChip(value: asset.priceChange24h),
-                        const Text(' (24 h)'),
+                        const SizedBox(width: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: PercentChip(value: asset.priceChange24h),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            ' 24 h',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                        ),
                       ],
                     ),
                   const SizedBox(height: 16),

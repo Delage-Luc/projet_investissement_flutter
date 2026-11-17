@@ -87,21 +87,32 @@ class _Metric extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colors = AppColors.of(context);
     return Card(
-      color: emphasized ? Theme.of(context).colorScheme.primaryContainer : null,
+      color: emphasized ? colors.highlight : null,
+      shape: emphasized
+          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(22))
+          : null,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: textTheme.labelMedium),
+            Text(
+              label.toUpperCase(),
+              style: textTheme.labelMedium?.copyWith(
+                color: emphasized ? colors.onHighlight : null,
+              ),
+            ),
             const SizedBox(height: 6),
             AnimatedNumberText(
               value: value,
               format: format,
               style: textTheme.titleLarge?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
+                color: emphasized ? colors.onHighlight : color,
+                fontWeight: FontWeight.w800,
+                fontFamily: AppTheme.displayFont,
+                fontFeatures: tabularFigures,
               ),
             ),
           ],

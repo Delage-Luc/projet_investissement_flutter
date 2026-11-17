@@ -83,7 +83,7 @@ class _StatCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Card(
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(22),
         onTap: () => showGeneralDialog<void>(
           context: context,
           barrierDismissible: true,
@@ -120,7 +120,7 @@ class _StatCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       label,
-                      style: textTheme.labelMedium,
+                      style: textTheme.labelMedium?.copyWith(letterSpacing: 0),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -131,9 +131,10 @@ class _StatCard extends StatelessWidget {
               AnimatedNumberText(
                 value: value,
                 format: format,
-                style: textTheme.titleMedium?.copyWith(
+                style: textTheme.titleLarge?.copyWith(
                   color: color,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: tabularFigures,
                 ),
               ),
             ],

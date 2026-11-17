@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/asset_score.dart';
 import 'package:projet_investissement_flutter/domain/models/glossary.dart';
+import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/animated_number_text.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/learn_more_link.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
@@ -32,7 +33,7 @@ class ScoreCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Score de la période',
-                    style: textTheme.titleMedium,
+                    style: textTheme.titleLarge,
                   ),
                 ),
                 AnimatedNumberText(
@@ -40,7 +41,7 @@ class ScoreCard extends StatelessWidget {
                   format: (v) => '${v.round()}/100',
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: _scoreColor(total),
+                    color: _scoreColor(context, total),
                   ),
                 ),
               ],
@@ -95,10 +96,11 @@ class ScoreCard extends StatelessWidget {
     );
   }
 
-  static Color _scoreColor(double score) {
-    if (score >= 65) return Colors.green.shade600;
-    if (score >= 40) return Colors.orange.shade700;
-    return Colors.red.shade600;
+  static Color _scoreColor(BuildContext context, double score) {
+    final colors = AppColors.of(context);
+    if (score >= 65) return colors.gain;
+    if (score >= 40) return colors.warning;
+    return colors.loss;
   }
 }
 
