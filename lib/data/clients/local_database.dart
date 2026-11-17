@@ -192,4 +192,18 @@ class LocalDatabase {
   Future<void> removeFavorite(String assetId) {
     return _db.delete('favorites', where: 'asset_id = ?', whereArgs: [assetId]);
   }
+
+  // Simulations sauvegardées
+
+  /// Simulations de la plus récente à la plus ancienne.
+  Future<List<Map<String, Object?>>> getSimulationRows() =>
+      _db.query('saved_simulations', orderBy: 'created_at_ms DESC, id DESC');
+
+  /// Insère une simulation et renvoie son identifiant. Une ligne fournie avec
+  /// son `id` (annulation d'une suppression) retrouve le même identifiant.
+  Future<int> insertSimulationRow(Map<String, Object?> row) =>
+      _db.insert('saved_simulations', row);
+
+  Future<void> deleteSimulation(int id) =>
+      _db.delete('saved_simulations', where: 'id = ?', whereArgs: [id]);
 }

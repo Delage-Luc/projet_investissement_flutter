@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:go_router/go_router.dart';
 import 'package:projet_investissement_flutter/data/repositories/market_repository.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
+import 'package:projet_investissement_flutter/routing/routes.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
 import 'package:projet_investissement_flutter/ui/settings/view_models/settings_view_model.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
 import 'package:projet_investissement_flutter/ui/simulator/view_models/simulator_view_model.dart';
-import 'package:projet_investissement_flutter/ui/simulator/widgets/projection_chart.dart';
-import 'package:projet_investissement_flutter/ui/simulator/widgets/result_summary.dart';
+import 'package:projet_investissement_flutter/ui/saved_simulations/view_models/saved_simulations_view_model.dart';
+import 'package:projet_investissement_flutter/ui/saved_simulations/widgets/save_simulation_dialog.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/feedback.dart';
 import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_form.dart';
+import 'package:projet_investissement_flutter/ui/simulator/widgets/simulation_result_view.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 import 'package:provider/provider.dart';
 
@@ -31,8 +35,10 @@ class SimulatorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) =>
-          SimulatorViewModel(repository: context.read<MarketRepository>()),
+      create: (context) => SimulatorViewModel(
+        repository: context.read<MarketRepository>(),
+        settings: context.read<SettingsViewModel>(),
+      ),
       child: const _SimulatorView(),
     );
   }
@@ -95,7 +101,16 @@ class _SimulatorViewState extends State<_SimulatorView> {
     final assets = context.watch<MarketViewModel>().state.data ?? const [];
 
     return Scaffold(
-      appBar: CustomAppBar(title: 'Simulateur DCA'),
+      appBar: CustomAppBar(
+        title: 'Simulateur DCA',
+        actions: [
+          IconButton(
+            tooltip: 'Simulations sauvegardées',
+            icon: const Icon(Icons.history),
+            onPressed: () => context.push(Routes.savedSimulations),
+          ),
+        ],
+      ),
       // LayoutBuilder : la fiche occupe une fraction de la hauteur du Stack,
       // il faut donc connaître cette hauteur pour convertir fraction -> pixels.
       body: LayoutBuilder(
@@ -115,8 +130,7 @@ class _SimulatorViewState extends State<_SimulatorView> {
                     SimulationForm(
                       vsCurrency: vs,
                       assets: assets,
-                      onSubmit: (input) =>
-                          simulator.simulate(input, vsCurrency: vs),
+                      onSubmit: simulator.simulate,
                       onReset: simulator.reset,
                       isLoading: simulator.isLoading,
                     ),
@@ -142,8 +156,9 @@ class _SimulatorViewState extends State<_SimulatorView> {
                     if (simulator.hasResult)
                       ValueListenableBuilder<double>(
                         valueListenable: _sheetExtent,
-                        builder: (context, extent, _) =>
-                            SizedBox(height: extent * constraints.maxHeight + 16),
+                        builder: (context, extent, _) => SizedBox(
+                          height: extent * constraints.maxHeight + 16,
+                        ),
                       ),
                   ],
                 ),
@@ -151,7 +166,8 @@ class _SimulatorViewState extends State<_SimulatorView> {
                   _ResultSection(
                     input: simulator.input!,
                     result: simulator.result,
-                    vsCurrency: vs,
+                    lumpSum: simulator.lumpSum,
+                    vsCurrency: simulator.resultCurrency,
                   ),
               ],
             ),
@@ -170,8 +186,9 @@ class _DcaIntro extends StatelessWidget {
     return ExpansionTile(
       initiallyExpanded: true,
       backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-      collapsedBackgroundColor:
-          Theme.of(context).colorScheme.secondaryContainer,
+      collapsedBackgroundColor: Theme.of(context)
+          .colorScheme
+          .secondaryContainer,
       title: const Text(
         'Qu\'est-ce que le DCA ?',
         style: TextStyle(fontWeight: FontWeight.bold),
@@ -196,22 +213,54 @@ class _ResultSection extends StatelessWidget {
   const _ResultSection({
     required this.input,
     required this.result,
+    required this.lumpSum,
     required this.vsCurrency,
   });
 
   final SimulationInput input;
   final ProjectionResult result;
+  final ProjectionResult lumpSum;
   final String vsCurrency;
+
+  /// Nom proposé par défaut, modifiable dans la boîte de dialogue.
+  String get _suggestedName => input.cryptoAsset == null
+      ? '${Formatters.percent(input.annualRatePercent).replaceFirst('+', '')} '
+            'sur ${input.years} an${input.years > 1 ? 's' : ''}'
+      : '${input.cryptoAsset!.name} · '
+            '${Formatters.money(input.monthlyContribution, vsCurrency)}/mois';
+
+  Future<void> _save(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final simulator = context.read<SimulatorViewModel>();
+    final saved = context.read<SavedSimulationsViewModel>();
+    final router = GoRouter.of(context);
+
+    final name = await showSaveSimulationDialog(
+      context,
+      suggestedName: _suggestedName,
+    );
+    if (name == null) return;
+    final simulation = simulator.toSaved(name);
+    if (simulation == null) return;
+    final error = await saved.save(simulation);
+    if (!messenger.mounted) return;
+    if (error != null) {
+      showMessage(messenger, error, isError: true);
+    } else {
+      showMessage(
+        messenger,
+        'Simulation « $name » sauvegardée.',
+        action: SnackBarAction(
+          label: 'Voir',
+          onPressed: () => router.push(Routes.savedSimulations),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final simulationDescription = input.cryptoAsset == null
-        ? 'pendant ${input.years} ans à '
-              '${Formatters.percent(input.annualRatePercent).replaceFirst('+', '')} par an'
-        : 'en rejouant les cours historiques de '
-              '${input.cryptoAsset!.name} (${input.cryptoAsset!.symbol.toUpperCase()}) '
-              'sur ${input.years} ans';
     return DraggableScrollableSheet(
       initialChildSize: _SheetSizes.initial,
       minChildSize: _SheetSizes.min,
@@ -247,23 +296,24 @@ class _ResultSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Résultat', style: textTheme.titleLarge),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Avec ${Formatters.money(input.initialCapital, vsCurrency)} au départ '
-                    'et ${Formatters.money(input.monthlyContribution, vsCurrency)} par mois '
-                    '$simulationDescription :',
-                    style: textTheme.bodyMedium,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text('Résultat', style: textTheme.titleLarge),
+                      ),
+                      FilledButton.tonalIcon(
+                        onPressed: () => _save(context),
+                        icon: const Icon(Icons.bookmark_add_outlined),
+                        label: const Text('Sauvegarder'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  ResultSummary(result: result, vsCurrency: vsCurrency),
-                  const SizedBox(height: 16),
-                  ProjectionChart(result: result, vsCurrency: vsCurrency),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Cette simulation ne prend pas en compte les frais ni la fiscalité. '
-                    'Les résultats historiques ne préjugent pas des performances futures.',
-                    style: textTheme.bodySmall,
+                  const SizedBox(height: 8),
+                  SimulationResultView(
+                    input: input,
+                    result: result,
+                    lumpSum: lumpSum,
+                    vsCurrency: vsCurrency,
                   ),
                 ],
               ),

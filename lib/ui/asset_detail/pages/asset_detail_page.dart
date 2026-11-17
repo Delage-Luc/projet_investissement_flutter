@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/data/repositories/market_repository.dart';
 import 'package:projet_investissement_flutter/ui/asset_detail/view_models/asset_detail_view_model.dart';
+import 'package:projet_investissement_flutter/ui/asset_detail/widgets/insights_card.dart';
 import 'package:projet_investissement_flutter/ui/asset_detail/widgets/period_selector.dart';
 import 'package:projet_investissement_flutter/ui/asset_detail/widgets/price_chart.dart';
+import 'package:projet_investissement_flutter/ui/asset_detail/widgets/score_card.dart';
 import 'package:projet_investissement_flutter/ui/asset_detail/widgets/stats_grid.dart';
 import 'package:projet_investissement_flutter/ui/favorites/view_models/favorites_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
@@ -10,6 +12,7 @@ import 'package:projet_investissement_flutter/ui/settings/view_models/settings_v
 import 'package:projet_investissement_flutter/ui/shared/themes/app_theme.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/error_view.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/favorite_button.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/feedback.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/percent_chip.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/status_banner.dart';
 import 'package:projet_investissement_flutter/utils/async_state.dart';
@@ -55,7 +58,7 @@ class _AssetDetailView extends StatelessWidget {
         actions: [
           FavoriteButton(
             isFavorite: favorites.isFavorite(assetId),
-            onPressed: () => favorites.toggle(assetId),
+            onPressed: () => toggleFavorite(context, assetId),
           ),
         ],
       ),
@@ -69,7 +72,15 @@ class _AssetDetailView extends StatelessWidget {
               onRefresh: () => detail.load(forceRefresh: true),
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
+                // Page hors onglets : rien ne réserve la place de la barre
+                // système Android en bas, on ajoute donc sa hauteur. Le
+                // contenu défile derrière elle mais finit au-dessus.
+                padding: EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  16 + MediaQuery.paddingOf(context).bottom,
+                ),
                 children: [
                   if (asset != null)
                     Row(
@@ -100,6 +111,17 @@ class _AssetDetailView extends StatelessWidget {
                     maxDrawdown: detail.maxDrawdown,
                   ),
                   const SizedBox(height: 16),
+                  if (state.hasData) ...[
+                    InsightsCard(
+                      detail: detail,
+                      assetName: asset?.name ?? assetId,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (detail.score != null) ...[
+                    ScoreCard(score: detail.score!),
+                    const SizedBox(height: 16),
+                  ],
                   Text(
                     'Outil pédagogique : aucune transaction réelle. '
                     'Les performances passées ne préjugent pas des '
@@ -140,6 +162,7 @@ class _AssetDetailView extends StatelessWidget {
       points: detail.visiblePoints,
       vsCurrency: vs,
       color: pnlColor(context, detail.performance),
+      drawdown: detail.drawdown,
     );
   }
 }

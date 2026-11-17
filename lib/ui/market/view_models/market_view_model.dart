@@ -10,7 +10,12 @@ class MarketViewModel extends ChangeNotifier {
     required MarketRepository repository,
     required SettingsViewModel settings,
   })  : _repository = repository,
-        _settings = settings;
+        _settings = settings,
+        _loadedCurrency = settings.vsCurrency {
+    // La devise appartient aux préférences : le marché se recharge dès
+    // qu'elle change, quel que soit l'écran qui l'a modifiée.
+    _settings.addListener(_onSettingsChanged);
+  }
 
   final MarketRepository _repository;
   final SettingsViewModel _settings;
@@ -18,6 +23,7 @@ class MarketViewModel extends ChangeNotifier {
   AsyncState<List<CryptoAsset>> _state = const AsyncState.initial();
   String _query = '';
   int _requestId = 0;
+  String _loadedCurrency;
 
   AsyncState<List<CryptoAsset>> get state => _state;
   String get vsCurrency => _settings.vsCurrency;
@@ -78,10 +84,17 @@ class MarketViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> changeCurrency(String currency) async {
-    if (currency == _settings.vsCurrency) return;
-    await _settings.setVsCurrency(currency);
+  void _onSettingsChanged() {
+    if (_settings.vsCurrency == _loadedCurrency) return; // ex. : thème modifié
+    _loadedCurrency = _settings.vsCurrency;
+    // Les prix de l'ancienne devise ne doivent plus être affichés.
     _state = const AsyncState.initial();
-    await load();
+    load();
+  }
+
+  @override
+  void dispose() {
+    _settings.removeListener(_onSettingsChanged);
+    super.dispose();
   }
 }

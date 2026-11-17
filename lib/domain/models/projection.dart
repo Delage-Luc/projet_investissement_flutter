@@ -25,6 +25,27 @@ class SimulationInput {
 
   /// Crypto dont les cours historiques sont rejoués, ou null pour un taux fixe.
   final CryptoAsset? cryptoAsset;
+
+  bool get isCrypto => cryptoAsset != null;
+
+  factory SimulationInput.fromJson(Map<String, dynamic> json) {
+    final asset = json['asset'] as Map<String, dynamic>?;
+    return SimulationInput(
+      initialCapital: (json['initialCapital'] as num).toDouble(),
+      monthlyContribution: (json['monthlyContribution'] as num).toDouble(),
+      annualRatePercent: (json['annualRatePercent'] as num).toDouble(),
+      years: (json['years'] as num).toInt(),
+      cryptoAsset: asset == null ? null : CryptoAsset.fromJson(asset),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'initialCapital': initialCapital,
+    'monthlyContribution': monthlyContribution,
+    'annualRatePercent': annualRatePercent,
+    'years': years,
+    'asset': cryptoAsset?.toJson(),
+  };
 }
 
 /// État du portefeuille simulé à la fin d'un mois.
@@ -42,6 +63,15 @@ class ProjectionPoint {
 
   /// Valeur du portefeuille avec les intérêts composés.
   final double value;
+
+  /// Forme compacte `[mois, investi, valeur]` pour la persistance.
+  factory ProjectionPoint.fromJson(List<dynamic> json) => ProjectionPoint(
+    month: (json[0] as num).toInt(),
+    invested: (json[1] as num).toDouble(),
+    value: (json[2] as num).toDouble(),
+  );
+
+  List<num> toJson() => [month, invested, value];
 }
 
 /// Résultat d'une simulation : un point par mois, du mois 0 au dernier mois.
@@ -60,4 +90,12 @@ class ProjectionResult {
   /// null si rien n'a été versé (évite la division par zéro).
   double? get performancePercent =>
       FinanceCalculator.variationPercent(totalInvested, finalValue);
+
+  factory ProjectionResult.fromJson(List<dynamic> json) => ProjectionResult(
+    points: [
+      for (final p in json) ProjectionPoint.fromJson(p as List<dynamic>),
+    ],
+  );
+
+  List<List<num>> toJson() => [for (final p in points) p.toJson()];
 }

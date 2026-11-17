@@ -35,13 +35,15 @@ class StatsGrid extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _StatCard(
-            label: 'Volatilité',
+            label: 'Volatilité / an',
             value: volatility,
+            format: Formatters.unsignedPercent,
             explanation:
-                'Mesure à quel point le prix varie d\'un jour à l\'autre '
-                '(écart-type des variations quotidiennes). Plus elle est '
+                'Mesure à quel point le prix varie (écart-type des variations '
+                'quotidiennes, ramené à une année : × √365). Plus elle est '
                 'élevée, plus le prix est instable : un rendement potentiel '
-                'élevé s\'accompagne souvent d\'un risque élevé.',
+                'élevé s\'accompagne souvent d\'un risque élevé. Repère : un '
+                'grand indice d\'actions tourne autour de 15 à 20 % par an.',
           ),
         ),
         const SizedBox(width: 8),
@@ -67,12 +69,14 @@ class _StatCard extends StatelessWidget {
     required this.value,
     required this.explanation,
     this.color,
+    this.format = Formatters.percent,
   });
 
   final String label;
   final double? value;
   final String explanation;
   final Color? color;
+  final String Function(double) format;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +130,7 @@ class _StatCard extends StatelessWidget {
               const SizedBox(height: 6),
               AnimatedNumberText(
                 value: value,
-                format: Formatters.percent,
+                format: format,
                 style: textTheme.titleMedium?.copyWith(
                   color: color,
                   fontWeight: FontWeight.w700,

@@ -42,6 +42,10 @@ class Formatters {
     return '$sign${NumberFormat('0.00', _locale).format(value)} %';
   }
 
+  /// Pourcentage sans signe (« 28,00 % »), pour les phrases explicatives.
+  static String unsignedPercent(double value) =>
+      '${NumberFormat('0.0', _locale).format(value.abs())} %';
+
   static String date(DateTime d) =>
       DateFormat('dd/MM/yyyy', _locale).format(d.toLocal());
 

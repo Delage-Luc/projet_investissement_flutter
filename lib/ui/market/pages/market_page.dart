@@ -5,6 +5,7 @@ import 'package:projet_investissement_flutter/ui/favorites/view_models/favorites
 import 'package:projet_investissement_flutter/ui/market/view_models/market_view_model.dart';
 import 'package:projet_investissement_flutter/ui/market/widgets/asset_tile.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/custom_app_bar.dart';
+import 'package:projet_investissement_flutter/ui/shared/widgets/feedback.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/error_view.dart';
 import 'package:projet_investissement_flutter/ui/shared/widgets/status_banner.dart';
 import 'package:projet_investissement_flutter/utils/async_state.dart';
@@ -88,7 +89,7 @@ class MarketPage extends StatelessWidget {
                   vsCurrency: market.vsCurrency,
                   isFavorite: favorites.isFavorite(asset.id),
                   onTap: () => context.push(Routes.asset(asset.id)),
-                  onToggleFavorite: () => favorites.toggle(asset.id),
+                  onToggleFavorite: () => toggleFavorite(context, asset.id),
                 );
               },
             ),

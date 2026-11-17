@@ -5,51 +5,100 @@ import 'package:flutter/material.dart';
 import 'package:projet_investissement_flutter/domain/models/projection.dart';
 import 'package:projet_investissement_flutter/utils/formatters.dart';
 
-/// Capital versé (pointillés) vs valeur du portefeuille (trait plein).
+/// Capital versé (pointillés), valeur du portefeuille (trait plein) et,
+/// si fourni, la même somme investie en une fois ([comparison]).
 ///
-/// Animation programmée : un TweenAnimationBuilder fait progresser de 0 à 1
-/// le nombre de points tracés, ce qui « dessine » la courbe de gauche à droite.
+/// Animation programmée explicitement : un [AnimationController] fait
+/// progresser de 0 à 1 le nombre de points tracés, ce qui « dessine » les
+/// courbes de gauche à droite. Le contrôleur est relancé à chaque nouveau
+/// résultat (didUpdateWidget) ou à la demande (bouton « Rejouer »).
 /// Les bornes des axes sont calculées sur toute la série pour ne pas sauter.
-class ProjectionChart extends StatelessWidget {
+class ProjectionChart extends StatefulWidget {
   const ProjectionChart({
     super.key,
     required this.result,
     required this.vsCurrency,
+    this.comparison,
   });
 
   final ProjectionResult result;
   final String vsCurrency;
+  final ProjectionResult? comparison;
+
+  @override
+  State<ProjectionChart> createState() => _ProjectionChartState();
+}
+
+class _ProjectionChartState extends State<ProjectionChart>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _progress;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _progress = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProjectionChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Nouvelle simulation = nouvel objet résultat : on redessine depuis 0.
+    if (!identical(oldWidget.result, widget.result)) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final points = result.points;
+    final points = widget.result.points;
     if (points.length < 2) return const SizedBox.shrink();
+    final comparison = widget.comparison?.points.length == points.length
+        ? widget.comparison!.points
+        : null;
 
     final scheme = Theme.of(context).colorScheme;
     final valueColor = scheme.primary;
     final investedColor = scheme.outline;
-    final maxY = points.map((p) => math.max(p.value, p.invested)).reduce(math.max);
-    final minY = points.map((p) => math.min(p.value, p.invested)).reduce(math.min);
+    final comparisonColor = scheme.tertiary;
+    final all = [...points, ...?comparison];
+    final maxY = all.map((p) => math.max(p.value, p.invested)).reduce(math.max);
+    final minY = all.map((p) => math.min(p.value, p.invested)).reduce(math.min);
     final padding = (maxY - minY) * 0.06;
     final years = points.last.month ~/ 12;
     final labelStyle = Theme.of(context).textTheme.bodySmall;
+    final labels = ['Versé', 'Valeur (DCA)', 'Tout au départ'];
 
     return Column(
       children: [
         SizedBox(
           height: 240,
-          child: TweenAnimationBuilder<double>(
-            // Nouvelle simulation = nouvel objet résultat = animation rejouée.
-            key: ObjectKey(result),
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 1200),
-            curve: Curves.easeInOut,
-            builder: (context, progress, _) {
-              final visible = math.max(2, (points.length * progress).round());
-              List<FlSpot> spots(double Function(ProjectionPoint) y) => [
-                    for (var i = 0; i < visible; i++)
-                      FlSpot(i.toDouble(), y(points[i])),
-                  ];
+          // Seul le graphique est reconstruit à chaque image de l'animation.
+          child: AnimatedBuilder(
+            animation: _progress,
+            builder: (context, _) {
+              final visible = math.max(
+                2,
+                (points.length * _progress.value).round(),
+              );
+              List<FlSpot> spots(
+                List<ProjectionPoint> source,
+                double Function(ProjectionPoint) y,
+              ) => [
+                for (var i = 0; i < visible; i++)
+                  FlSpot(i.toDouble(), y(source[i])),
+              ];
 
               return LineChart(
                 // Pas d'animation interne de fl_chart : c'est la nôtre qui pilote.
@@ -65,9 +114,9 @@ class ProjectionChart extends StatelessWidget {
                   lineTouchData: LineTouchData(
                     touchTooltipData: LineTouchTooltipData(
                       getTooltipItems: (touched) => touched.map((spot) {
-                        final label = spot.barIndex == 0 ? 'Versé' : 'Valeur';
                         return LineTooltipItem(
-                          '$label : ${Formatters.money(spot.y, vsCurrency)}',
+                          '${labels[spot.barIndex]} : '
+                          '${Formatters.money(spot.y, widget.vsCurrency)}',
                           const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
@@ -78,14 +127,14 @@ class ProjectionChart extends StatelessWidget {
                   ),
                   lineBarsData: [
                     LineChartBarData(
-                      spots: spots((p) => p.invested),
+                      spots: spots(points, (p) => p.invested),
                       color: investedColor,
                       barWidth: 2,
                       dashArray: [6, 4],
                       dotData: const FlDotData(show: false),
                     ),
                     LineChartBarData(
-                      spots: spots((p) => p.value),
+                      spots: spots(points, (p) => p.value),
                       isCurved: true,
                       curveSmoothness: 0.1,
                       color: valueColor,
@@ -96,6 +145,16 @@ class ProjectionChart extends StatelessWidget {
                         color: valueColor.withValues(alpha: 0.12),
                       ),
                     ),
+                    if (comparison != null)
+                      LineChartBarData(
+                        spots: spots(comparison, (p) => p.value),
+                        isCurved: true,
+                        curveSmoothness: 0.1,
+                        color: comparisonColor,
+                        barWidth: 2,
+                        dashArray: [2, 3],
+                        dotData: const FlDotData(show: false),
+                      ),
                   ],
                 ),
               );
@@ -107,16 +166,24 @@ class ProjectionChart extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Départ', style: labelStyle),
+            IconButton(
+              tooltip: 'Rejouer l\'animation',
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.replay, size: 18),
+              onPressed: () => _controller.forward(from: 0),
+            ),
             Text('Année $years', style: labelStyle),
           ],
         ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 16,
+          runSpacing: 4,
           children: [
-            _LegendDot(color: valueColor, label: 'Valeur du portefeuille'),
-            const SizedBox(width: 16),
+            _LegendDot(color: valueColor, label: 'Valeur (DCA)'),
             _LegendDot(color: investedColor, label: 'Capital versé'),
+            if (comparison != null)
+              _LegendDot(color: comparisonColor, label: 'Tout au départ'),
           ],
         ),
       ],

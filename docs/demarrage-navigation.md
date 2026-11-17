@@ -10,7 +10,7 @@ Point d'entrée `main()`. Initialise Flutter et le formatage français, ouvre SQ
 `AppConfig` centralise les paramètres : URL CoinGecko et clé éventuelle, taille du catalogue, devises prises en charge, délais, durées de cache, limite d'historique et nom de la base.
 
 ## [`lib/routing/routes.dart`](../lib/routing/routes.dart)
-`Routes` définit les chemins du marché, des favoris, du simulateur et de la fiche d'actif. `asset(id)` construit un chemin en encodant l'identifiant.
+`Routes` définit les chemins du marché, des favoris, du simulateur, de la fiche d'actif, des simulations sauvegardées et du lexique. `asset(id)`, `savedSimulation(id)` et `glossary(term:)` construisent les chemins paramétrés.
 
 ## [`lib/routing/app_router.dart`](../lib/routing/app_router.dart)
-`createRouter()` configure GoRouter : navigation à onglets conservant l'état de chaque branche et route de détail d'un actif.
+`createRouter()` configure GoRouter : navigation à onglets conservant l'état de chaque branche, simulations sauvegardées imbriquées dans l'onglet Simulateur, puis fiche d'actif et lexique affichés au-dessus des onglets.
